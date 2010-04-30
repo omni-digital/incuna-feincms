@@ -1,19 +1,23 @@
-from django.core.urlresolvers import reverse
-from django.conf import settings
 from django import template
+from django.conf import settings
+from django.core.urlresolvers import reverse
 
 register = template.Library()
 
 class GetFeincmsPageNode(template.Node):
-    def __init__(self, slug, var_name):        
-        self.slug = template.Variable(slug)
+    """
+    example usage:
+        {% get_feincms_page path as varname %}
+    """
+    def __init__(self, path, var_name):
+        self.path = template.Variable(path)
         self.var_name = var_name
 
     def render(self, context):
-        self.slug = self.slug.resolve(context)
+        self.path = self.path.resolve(context)
         from feincms.module.page.models import Page
         try: 
-            context[self.var_name] = Page.objects.get(slug=self.slug)
+            context[self.var_name] = Page.objects.page_for_path(path=self.path)
         except Page.DoesNotExist:
             pass
 
