@@ -1,7 +1,7 @@
 {% load feincms_page_tags incunafein_tags %}
 {% menuitems css_id %}
 {% for nav_page in entries %}
-    {% with nav_page|equals:feincms_page as is_current %}
+    {% with nav_page.get_absolute_url|equals:request.path as is_current %}
     {% menuitem "" nav_page.slug is_current|then:'selected' %}
     {% if is_current %}
         <span>{{ nav_page.title }}</span>
@@ -13,4 +13,3 @@
     {% endwith %}
 {% endfor %}
 {% endmenuitems %}
-

@@ -60,7 +60,7 @@ class FeincmsPageMenuNode(template.Node):
         context['depth'] = depth
         context['entries'] = self.entries(feincms_page, level, depth)
 
-        output = template.loader.get_template('page/menu.html').render(context)
+        output = template.loader.get_template('incunafein/page/menu.html').render(context)
         context.pop()
 
         return output
