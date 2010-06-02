@@ -1,0 +1,15 @@
+{% load feincms_page_tags navigationtags %}
+{% menuitems css_id instance.get_css_class %}
+{% for nav_item in entries %}
+    {% with nav_item.get_absolute_url|equals:request.path as is_current %}
+    {% menuitem "" nav_item.get_css_class is_current|then:'selected' %}
+    {% if is_current %}
+        <span>{{ nav_item }}</span>
+    {% else %}
+        <a href="{{ nav_item.get_absolute_url }}"><span>{{ nav_item }}</span></a>
+    {% endif %}
+    {% if nav_item|is_equal_or_parent_of:instance %}{% incunafein_navigation nav_item %}{% endif %}
+    {% endmenuitem %}
+    {% endwith %}
+{% endfor %}
+{% endmenuitems %}

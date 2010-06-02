@@ -1,6 +1,4 @@
 from django import template
-from django.conf import settings
-from django.core.urlresolvers import reverse
 from feincms.module.page.models import Page, PageManager
 
 register = template.Library()
@@ -39,38 +37,79 @@ class FeincmsPageMenuNode(template.Node):
     example usage:
         {% feincms_page_menu  feincms_page css_id level depth %}
     """
-    def __init__(self,  feincms_page, css_id="", level=1, depth=1):
+    def __init__(self,  feincms_page, css_id="", level=1, depth=1, always_show_subnav=False):
         self.feincms_page = feincms_page
-        #self.level = template.Variable(level)
-        #self.depth = template.Variable(depth)
+        self.css_id = css_id
         self.level = level
         self.depth = depth
-        self.css_id = css_id
+        self.always_show_subnav = always_show_subnav
 
     def render(self, context):
         feincms_page = self.feincms_page.resolve(context)
-        level = int(isinstance(self.level, template.FilterExpression) and self.level.resolve(context) or self.level)
-        depth = int(isinstance(self.depth, template.FilterExpression) and self.depth.resolve(context) or self.depth)
-        css_id = isinstance(self.css_id, template.FilterExpression) and self.css_id.resolve(context) or self.css_id
 
-        context.push()
-        context['feincms_page'] =  feincms_page
-        context['css_id'] = css_id
-        context['level'] = level
-        context['depth'] = depth
-        context['entries'] = self.entries(feincms_page, level, depth)
+        level = int(self.level.resolve(context)if isinstance(self.level, template.FilterExpression) else self.level)
+        depth = int(self.depth.resolve(context) if isinstance(self.depth, template.FilterExpression) else self.depth)
+        css_id = self.css_id.resolve(context) if isinstance(self.css_id, template.FilterExpression) else self.css_id
+        always_show_subnav = self.always_show_subnav.resolve(context) if isinstance(self.always_show_subnav, template.FilterExpression) else self.always_show_subnav
 
-        output = template.loader.get_template('incunafein/page/menu.html').render(context)
-        context.pop()
+        request = context['request']
+        entries = self.entries(feincms_page, level, depth, always_show_subnav)
 
-        return output
+        #context.push()
+        #context['feincms_page'] =  feincms_page
+        #context['css_id'] = css_id
+        #context['level'] = level
+        #context['depth'] = depth
+        #context['entries'] = entries
+        #output = template.loader.get_template('incunafein/page/menu.html').render(context)
+        #context.pop()
 
-    def entries(self, instance, level=1, depth=1):
+        def get_item(item, next=None):
+            context.push()
+
+            context['item'] = item
+            context['url'] = item.get_absolute_url()
+            context['is_current'] = context['url'] == request.path
+            context['title'] = item.title
+            context['css_class'] = item.slug
+            if context['is_current']:
+                context['css_class'] += ' selected'
+
+            if next:
+                if next.level > item.level:
+                    context['down'] = True
+                elif next.level < item.level:
+                    context['up'] = True
+
+            html = template.loader.get_template('incunafein/page/menuitem.html').render(context)
+            context.pop()
+
+            return html
+
+        if not entries:
+            return ''
+
+        output = ''
+        item = entries[0]
+        for next in entries[1:]:
+            output += get_item(item, next)
+            item = next
+            
+        output += get_item(item)
+
+        return '<ul id="%s">%s</ul>' % (css_id, output)
+
+    def entries(self, instance, level=1, depth=1, always_show_subnav=False):
         if level <= 1:
             if depth == 1:
                 return Page.objects.toplevel_navigation()
-            else:
+            elif always_show_subnav:
                 return Page.objects.in_navigation().filter(level__lt=depth)
+            else:
+                return Page.objects.toplevel_navigation() | \
+                        instance.get_ancestors().filter(in_navigation=True) | \
+                        instance.get_siblings(include_self=True).filter(in_navigation=True, level__lt=depth) | \
+                        instance.children.filter(in_navigation=True, level__lt=depth)
 
         # mptt starts counting at 0, NavigationNode at 1; if we need the submenu
         # of the current page, we have to add 2 to the mptt level
@@ -88,15 +127,20 @@ class FeincmsPageMenuNode(template.Node):
 
         if depth == 1:
             return instance.children.in_navigation()
-        else:
+        elif always_show_subnav:
             queryset = instance.get_descendants().filter(level__lte=instance.level + depth, in_navigation=True)
             return PageManager.apply_active_filters(queryset)
+        else:
+            return instance.children.in_navigation() | \
+                    instance.get_ancestors().filter(in_navigation=True, level__gte=level-1) | \
+                    instance.get_siblings(include_self=True).filter(in_navigation=True, level__gte=level-1, level__lte=instance.level + depth)
+
 
 
 def do_feincms_page_menu(parser, token):
     args = token.split_contents()
     if len(args) > 5:
-        raise template.TemplateSyntaxError("'%s tag accepts no more than 4 arguments." % args[0])
+        raise template.TemplateSyntaxError("'%s tag accepts no more than 5 arguments." % args[0])
     return FeincmsPageMenuNode(*map(parser.compile_filter, args[1:]))
 
 register.tag('feincms_page_menu', do_feincms_page_menu)

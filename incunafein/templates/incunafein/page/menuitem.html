@@ -1,0 +1,10 @@
+<li class="{{ css_class }}">
+    {% if down %}<ul>{% endif %}
+    {% if is_current %}
+        <span>{{ title }}</span>
+    {% else %}
+        <a href="{{ url }}"><span>{{ title }}</span></a>
+    {% endif %}
+    {% if up %}</ul>{% endif %}
+</li>
+    

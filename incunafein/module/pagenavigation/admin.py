@@ -10,6 +10,23 @@ class NavigationForm(forms.ModelForm):
     class Meta:
         models = Navigation
 
+
+    def clean_dom_id(self):
+        dom_id = self.cleaned_data['dom_id']
+        if dom_id:
+
+            qs = Navigation.objects.all()
+            if self.instance:
+                qs = qs.exclude(pk=self.instance.pk)
+            try:
+                qs.get(dom_id=dom_id)
+            except Navigation.DoesNotExist:
+                pass
+            else:
+                raise forms.ValidationError("This must be unique.")
+
+        return dom_id
+
     def clean(self):
         cleaned_data = self.cleaned_data
         parent = cleaned_data.get("parent")

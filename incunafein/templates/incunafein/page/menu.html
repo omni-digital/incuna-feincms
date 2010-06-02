@@ -8,7 +8,7 @@
     {% else %}
         <a href="{{ nav_page.get_absolute_url }}"><span>{{ nav_page.title }}</span></a>
     {% endif %}
-    {% if nav_page|is_equal_or_parent_of:feincms_page %}{% feincms_page_menu feincms_page "" level|add:1 depth %}{% endif %}
+    {#% if nav_page|is_equal_or_parent_of:feincms_page %}{% feincms_page_menu feincms_page "" level|add:1 %}{% endif %#}
     {% endmenuitem %}
     {% endwith %}
 {% endfor %}
