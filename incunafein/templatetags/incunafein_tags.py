@@ -139,7 +139,7 @@ class FeincmsPageMenuNode(template.Node):
 
 def do_feincms_page_menu(parser, token):
     args = token.split_contents()
-    if len(args) > 5:
+    if len(args) > 6:
         raise template.TemplateSyntaxError("'%s tag accepts no more than 5 arguments." % args[0])
     return FeincmsPageMenuNode(*map(parser.compile_filter, args[1:]))
 
