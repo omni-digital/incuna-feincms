@@ -1,7 +1,6 @@
 from django.db.models import Q
 from django import template
-#from feincms.module.page.models import Page, PageManager
-from incunafein.module.pagenavigation.models import Navigation#, NavigationManage
+from incunafein.module.pagenavigation.models import Navigation
 
 register = template.Library()
 class IncunaFeinNavigationNode(template.Node):
@@ -45,25 +44,10 @@ class IncunaFeinNavigationNode(template.Node):
 
         entries = self.entries(instance, current, depth, show_all_subnav)
 
-        print entries
-
         if not entries:
             return ''
 
-        #context.push()
-        #context['instance'] =  instance
-        #context['css_id'] = getattr(instance, 'dom_id', '')
-        #if instance is None:
-        #    context['entries'] = Navigation.objects.filter(parent__isnull=True)
-        #else:
-        #    context['entries'] = instance.children.all()
-
-        #output = template.loader.get_template('navigation/navigation.html').render(context)
-        #context.pop()
-
-        #return output
-
-        def get_item(item, next=None):
+        def get_item(item, next_level):
             context.push()
 
             context['item'] = item
@@ -74,11 +58,10 @@ class IncunaFeinNavigationNode(template.Node):
             if context['is_current']:
                 context['css_class'] += ' selected'
 
-            if next:
-                if next.level > item.level:
-                    context['down'] = True
-                elif next.level < item.level:
-                    context['up'] = True
+            if next_level > item.level:
+                context['down'] = next_level - item.level
+            elif next_level < item.level:
+                context['up'] = item.level - next_level
 
             html = template.loader.get_template('incunafein/page/menuitem.html').render(context)
             context.pop()
@@ -88,10 +71,10 @@ class IncunaFeinNavigationNode(template.Node):
         output = ''
         item = entries[0]
         for next in entries[1:]:
-            output += get_item(item, next)
+            output += get_item(item, next.level)
             item = next
-            
-        output += get_item(item)
+        
+        output += get_item(item, entries[0].level)
 
         if instance:
             return '<ul id="%s" class="%s">%s</ul>' % (instance.dom_id, instance.css_class, output)
@@ -100,28 +83,18 @@ class IncunaFeinNavigationNode(template.Node):
 
 
     def entries(self, instance, current, depth=1, show_all_subnav=False):
-        #if instance is None:
-        #    return Navigation.objects.filter(parent__isnull=True)
-        #else:
-        #    return instance.children.all()
 
         if depth == 1:
-            #return Page.objects.toplevel_navigation()
             if instance is None:
                 return Navigation.objects.filter(parent__isnull=True)
             else:
                 return instance.children.all()
         elif show_all_subnav:
-            #return Page.objects.in_navigation().filter(level__lt=depth)
             if instance is None:
-                return Navigation.objects.all()
+                return Navigation.objects.filter(level__lt=depth)
             else:
-                return instance.get_descendants()
+                return instance.get_descendants().filter(level__lt=depth)
         else:
-            #return Page.objects.toplevel_navigation() | \
-            #        instance.get_ancestors().filter(in_navigation=True) | \
-            #        instance.get_siblings(include_self=True).filter(in_navigation=True, level__lt=depth) | \
-            #        instance.children.filter(in_navigation=True, level__lt=depth)
             if instance is None:
                 qs = Navigation.objects.filter(parent__isnull=True) 
                 if current:
@@ -129,7 +102,6 @@ class IncunaFeinNavigationNode(template.Node):
                             | current.get_siblings(include_self=True).filter(level__lt=depth) \
                             | current.children.filter(level__lt=depth)
             else:
-                #return instance.children.all()
                 relative_depth = instance.level + depth
                 qs = instance.children.all()
                 if current:

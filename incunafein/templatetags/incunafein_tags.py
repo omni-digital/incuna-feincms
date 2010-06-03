@@ -34,8 +34,15 @@ register.tag('get_feincms_page', get_feincms_page)
 
 class FeincmsPageMenuNode(template.Node):
     """
+    Render the page navigation.
+    arguments: 
+        feincms_page: The current feincms_page.
+        css_id: The css (dom) id to be used for the menu.
+        level: The level at which to start the navigation.
+        depth: The depth of sub navigation to include.
+        show_all_subnav: Whether to show all sub navigation items (or just the ones in the current pages branch).
     example usage:
-        {% feincms_page_menu  feincms_page 'nav' 1 1 0 %}
+        {% feincms_page_menu  feincms_page 'nav' 1 2 %}
     """
     def __init__(self,  feincms_page, css_id="", level=1, depth=1, show_all_subnav=False):
         self.feincms_page = feincms_page
@@ -57,7 +64,7 @@ class FeincmsPageMenuNode(template.Node):
         request = context['request']
         entries = self.entries(feincms_page, level, depth, show_all_subnav)
 
-        def get_item(item, next=None):
+        def get_item(item, next_level):
             context.push()
 
             context['item'] = item
@@ -68,11 +75,10 @@ class FeincmsPageMenuNode(template.Node):
             if context['is_current']:
                 context['css_class'] += ' selected'
 
-            if next:
-                if next.level > item.level:
-                    context['down'] = True
-                elif next.level < item.level:
-                    context['up'] = True
+            if next_level > item.level:
+                context['down'] = next_level - item.level
+            elif next_level < item.level:
+                context['up'] = item.level - next_level
 
             html = template.loader.get_template('incunafein/page/menuitem.html').render(context)
             context.pop()
@@ -85,10 +91,10 @@ class FeincmsPageMenuNode(template.Node):
         output = ''
         item = entries[0]
         for next in entries[1:]:
-            output += get_item(item, next)
+            output += get_item(item, next.level)
             item = next
             
-        output += get_item(item)
+        output += get_item(item, entries[0].level)
 
         return '<ul id="%s">%s</ul>' % (css_id, output)
 
