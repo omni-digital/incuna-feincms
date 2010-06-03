@@ -1,6 +1,6 @@
 from django.db.models import Q
 from django import template
-from incunafein.module.pagenavigation.models import Navigation
+from incunafein.module.navigation.models import Navigation
 
 register = template.Library()
 class IncunaFeinNavigationNode(template.Node):
