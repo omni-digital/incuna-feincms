@@ -52,17 +52,10 @@ class FeincmsPageMenuNode(template.Node):
         css_id = self.css_id.resolve(context) if isinstance(self.css_id, template.FilterExpression) else self.css_id
         show_all_subnav = self.show_all_subnav.resolve(context) if isinstance(self.show_all_subnav, template.FilterExpression) else self.show_all_subnav
 
+        if not 'request' in context:
+            raise ValueError("No request in the context. Try using RequestContext in the view.")
         request = context['request']
         entries = self.entries(feincms_page, level, depth, show_all_subnav)
-
-        #context.push()
-        #context['feincms_page'] =  feincms_page
-        #context['css_id'] = css_id
-        #context['level'] = level
-        #context['depth'] = depth
-        #context['entries'] = entries
-        #output = template.loader.get_template('incunafein/page/menu.html').render(context)
-        #context.pop()
 
         def get_item(item, next=None):
             context.push()
