@@ -6,9 +6,9 @@ register = template.Library()
 class IncunaFeinNavigationNode(template.Node):
     """
     Render a navigation.
-    Arguments: 
+    arguments: 
         navigate: The root item (instance or dom_id) of the navigation to render.
-        depth: the depth of sub navigation to include.
+        depth: The depth of sub navigation to include.
         show_all_subnav: Whether to show all sub navigation items (or just the ones in the currently selected branch).
 
     example usage:
@@ -63,7 +63,7 @@ class IncunaFeinNavigationNode(template.Node):
             elif next_level < item.level:
                 context['up'] = item.level - next_level
 
-            html = template.loader.get_template('incunafein/page/menuitem.html').render(context)
+            html = template.loader.get_template('navigation/navitem.html').render(context)
             context.pop()
 
             return html

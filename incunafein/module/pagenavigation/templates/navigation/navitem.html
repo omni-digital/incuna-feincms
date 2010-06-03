@@ -1,0 +1,14 @@
+<li class="{{ css_class }}">
+{% if is_current %}
+    <span>{{ title }}</span>
+{% else %}
+    <a href="{{ url }}"><span>{{ title }}</span></a>
+{% endif %}
+{% if down %}
+    {% for i in down|as_range %}<ul>{% endfor %}
+{% else %}{% if up %}
+    </li>{% for i in up|as_range %}</ul></li>{% endfor %}
+{% else %}
+    </li>
+{% endif %}{% endif %}
+    
