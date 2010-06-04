@@ -96,7 +96,12 @@ class FeincmsPageMenuNode(template.Node):
             
         output += get_item(item, entries[0].level)
 
-        return '<ul id="%s">%s</ul>' % (css_id, output)
+        if css_id:
+            attrs = ' id="%s"' % css_id
+        else:
+            attrs = ''
+
+        return '<ul%s>%s</ul>' % (attrs, output)
 
     def entries(self, instance, level=1, depth=1, show_all_subnav=False):
         if level <= 1:
