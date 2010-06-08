@@ -48,16 +48,29 @@ class IncunaFeinNavigationNode(template.Node):
         if not entries:
             return ''
 
-        def get_item(item, next_level):
+        def get_item(item, next_level, extra_context=None):
             context.push()
+
+            if extra_context:
+                context.update(extra_context)
 
             context['item'] = item
             context['url'] = item.get_absolute_url()
             context['is_current'] = context['url'] == path
             context['title'] = unicode(item)
-            context['css_class'] = item.css_class
+
+            css_class = item.css_class or (item.page and item.page.slug) or ''
+            if css_class:
+                if 'css_class' in context:
+                    context['css_class'] += ' ' + css_class
+                else:
+                    context['css_class'] = css_class
+
             if context['is_current']:
-                context['css_class'] += ' selected'
+                if 'css_class' in context:
+                    context['css_class'] += ' selected'
+                else:
+                    context['css_class'] = 'selected'
 
             if next_level > item.level:
                 context['down'] = next_level - item.level
@@ -71,11 +84,11 @@ class IncunaFeinNavigationNode(template.Node):
 
         output = ''
         item = entries[0]
-        for next in entries[1:]:
-            output += get_item(item, next.level)
+        for i, next in enumerate(entries[1:]):
+            output += get_item(item, next.level, {'css_class': i==0 and 'first' or ''})
             item = next
         
-        output += get_item(item, entries[0].level)
+        output += get_item(item, entries[0].level, {'css_class': len(entries)==1 and 'first last' or 'last'})
 
         if instance:
             return '<ul id="%s" class="%s">%s</ul>' % (instance.dom_id, instance.css_class, output)
