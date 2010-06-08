@@ -30,8 +30,9 @@ class IncunaFeinNavigationNode(template.Node):
         elif isinstance(navigate, (str, unicode)) and navigate:
             try:
                 instance = Navigation.objects.get(dom_id=navigate)
-            except Navigation.DoesNotExist:
-                pass
+            except Navigation.DoesNotExist, er:
+                raise Navigation.DoesNotExist("Navigation with dom_id=%s does not exist." % (navigate,))
+
 
         if not 'request' in context:
             raise ValueError("No request in the context. Try using RequestContext in the view.")
