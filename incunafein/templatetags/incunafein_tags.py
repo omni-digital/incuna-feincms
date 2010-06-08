@@ -1,5 +1,6 @@
 from django import template
 from feincms.module.page.models import Page, PageManager
+from feincms.module.page.templatetags.feincms_page_tags import is_equal_or_parent_of
 
 register = template.Library()
 
@@ -72,7 +73,7 @@ class FeincmsPageMenuNode(template.Node):
             context['is_current'] = context['url'] == request.path
             context['title'] = item.title
             context['css_class'] = item.slug
-            if context['is_current']:
+            if context['is_current'] or is_equal_or_parent_of(item, feincms_page):
                 context['css_class'] += ' selected'
 
             if next_level > item.level:
