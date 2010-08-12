@@ -123,10 +123,11 @@ class FeincmsPageMenuNode(template.Node):
             elif show_all_subnav:
                 return Page.objects.in_navigation().filter(level__lt=depth)
             else:
-                return Page.objects.toplevel_navigation() | \
+                queryset = Page.objects.toplevel_navigation() | \
                         instance.get_ancestors().filter(in_navigation=True) | \
                         instance.get_siblings(include_self=True).filter(in_navigation=True, level__lt=depth) | \
                         instance.children.filter(in_navigation=True, level__lt=depth)
+                return PageManager.apply_active_filters(queryset)
 
         # mptt starts counting at 0, NavigationNode at 1; if we need the submenu
         # of the current page, we have to add 2 to the mptt level
@@ -148,9 +149,10 @@ class FeincmsPageMenuNode(template.Node):
             queryset = instance.get_descendants().filter(level__lte=instance.level + depth, in_navigation=True)
             return PageManager.apply_active_filters(queryset)
         else:
-            return instance.children.in_navigation() | \
+            queryset = instance.children.in_navigation() | \
                     instance.get_ancestors().filter(in_navigation=True, level__gte=level-1) | \
                     instance.get_siblings(include_self=True).filter(in_navigation=True, level__gte=level-1, level__lte=instance.level + depth)
+            return PageManager.apply_active_filters(queryset)
 
 
 
