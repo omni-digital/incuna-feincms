@@ -42,17 +42,20 @@ class FeincmsPageMenuNode(template.Node):
         level: The level at which to start the navigation.
         depth: The depth of sub navigation to include.
         show_all_subnav: Whether to show all sub navigation items (or just the ones in the current pages branch).
+        extended: Whether the navigation has been extended (to enable third party apps to exgtend the navigation).
     example usage:
         {% feincms_page_menu  feincms_page 'nav' 1 2 %}
     """
-    def __init__(self,  feincms_page, css_id="", level=1, depth=1, show_all_subnav=False):
+    def __init__(self,  feincms_page, css_id="", level=1, depth=1, show_all_subnav=False, extended=False):
         self.feincms_page = feincms_page
         self.css_id = css_id
         self.level = level
         self.depth = depth
         self.show_all_subnav = show_all_subnav
+        self.extended = extended
 
     def render(self, context):
+        self.render_context = context
         feincms_page = self.feincms_page.resolve(context)
 
         if not isinstance(feincms_page, Page):
@@ -62,12 +65,14 @@ class FeincmsPageMenuNode(template.Node):
         depth = int(self.depth.resolve(context) if isinstance(self.depth, template.FilterExpression) else self.depth)
         css_id = self.css_id.resolve(context) if isinstance(self.css_id, template.FilterExpression) else self.css_id
         show_all_subnav = self.show_all_subnav.resolve(context) if isinstance(self.show_all_subnav, template.FilterExpression) else self.show_all_subnav
+        extended = self.extended.resolve(context) if isinstance(self.extended, template.FilterExpression) else self.extended
 
         if not 'request' in context:
             raise ValueError("No request in the context. Try using RequestContext in the view.")
+
         request = context['request']
 
-        entries = self.entries(feincms_page, level, depth, show_all_subnav)
+        entries = self.what(feincms_page, level, depth, show_all_subnav, extended)
 
         if not entries:
             return ''
@@ -116,6 +121,25 @@ class FeincmsPageMenuNode(template.Node):
 
         return '<ul%s>%s</ul>' % (attrs, output)
 
+    def what(self, instance, level=1, depth=1, show_all_subnav=False, extended=False):
+
+        entries = self.entries(instance, level, depth, show_all_subnav)
+
+        if extended:
+            _entries = list(entries)
+            entries = []
+
+            for entry in _entries:
+                entries.append(entry)
+
+                if getattr(entry, 'navigation_extension', None):
+                    entries.extend(entry.extended_navigation(depth=depth,
+                                                             request=self.render_context.get('request', None),
+                                                             show_all_subnav=show_all_subnav))
+
+        return entries
+
+
     def entries(self, instance, level=1, depth=1, show_all_subnav=False):
         if level <= 1:
             if depth == 1:
@@ -158,8 +182,8 @@ class FeincmsPageMenuNode(template.Node):
 
 def do_feincms_page_menu(parser, token):
     args = token.split_contents()
-    if len(args) > 6:
-        raise template.TemplateSyntaxError("'%s tag accepts no more than 5 arguments." % args[0])
+    if len(args) > 7:
+        raise template.TemplateSyntaxError("'%s tag accepts no more than 6 arguments." % args[0])
     return FeincmsPageMenuNode(*map(parser.compile_filter, args[1:]))
 
 register.tag('feincms_page_menu', do_feincms_page_menu)
