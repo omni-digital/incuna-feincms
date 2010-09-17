@@ -77,49 +77,6 @@ class FeincmsPageMenuNode(template.Node):
         if not entries:
             return ''
 
-        def get_item(item, prev_level, next_level, extra_context=None):
-            context.push()
-
-            if extra_context:
-                context.update(extra_context)
-
-            context['item'] = item
-            context['url'] = item.get_absolute_url()
-            context['is_current'] = context['url'] == request.path
-            context['title'] = item.title
-
-            if 'css_class' in context:
-                context['css_class'] += ' ' + item.slug
-            else:
-                context['css_class'] = item.slug
-
-            if context['is_current'] or is_equal_or_parent_of(item, feincms_page):
-                context['css_class'] += ' selected'
-
-            if next_level > item.level:
-                context['down'] = next_level - item.level
-            elif next_level < item.level:
-                context['up'] = item.level - next_level
-                #context['css_class'] += ' last'
-
-            if prev_level < item.level:
-                context['css_class'] += ' first'
-
-            html = template.loader.get_template('incunafein/page/menuitem.html').render(context)
-            context.pop()
-
-            return html
-
-        output = ''
-        #prev_level = -1
-        #item = entries[0]
-        #for i, next in enumerate(entries[1:]):
-        #    output += get_item(item, prev_level, next.level)
-        #    prev_level = item.level
-        #    item = next
-            
-        #output += get_item(item, prev_level, entries[0].level, {'css_class': len(entries)==1 and 'first last' or 'last'})
-
         def get_next_item(item, remaining, prev_level=-1, extra_context=None):
             context.push()
 
@@ -167,6 +124,7 @@ class FeincmsPageMenuNode(template.Node):
 
             return html
 
+        output = ''
         items = list(entries)
         item = items.pop(0)
         prev_level = -1
