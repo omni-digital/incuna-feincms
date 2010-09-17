@@ -111,14 +111,71 @@ class FeincmsPageMenuNode(template.Node):
             return html
 
         output = ''
-        prev_level = -1
-        item = entries[0]
-        for i, next in enumerate(entries[1:]):
-            output += get_item(item, prev_level, next.level)
-            prev_level = item.level
-            item = next
+        #prev_level = -1
+        #item = entries[0]
+        #for i, next in enumerate(entries[1:]):
+        #    output += get_item(item, prev_level, next.level)
+        #    prev_level = item.level
+        #    item = next
             
-        output += get_item(item, prev_level, entries[0].level, {'css_class': len(entries)==1 and 'first last' or 'last'})
+        #output += get_item(item, prev_level, entries[0].level, {'css_class': len(entries)==1 and 'first last' or 'last'})
+
+        def get_next_item(item, remaining, prev_level=-1, extra_context=None):
+            context.push()
+
+            if remaining:
+                next_level = remaining[0].level
+            else:
+                next_level = item.level
+
+
+            if extra_context:
+                context.update(extra_context)
+
+            context['item'] = item
+            context['url'] = item.get_absolute_url()
+            context['is_current'] = context['url'] == request.path
+            context['title'] = item.title
+
+            if 'css_class' in context:
+                context['css_class'] += ' ' + item.slug
+            else:
+                context['css_class'] = item.slug
+
+            if context['is_current'] or is_equal_or_parent_of(item, feincms_page):
+                context['css_class'] += ' selected'
+
+            if next_level > item.level:
+                context['down'] = next_level - item.level
+                # look ahead to the next at this level
+                for next in remaining:
+                    if next.level == item.level:
+                        break
+                    elif next.level < item.level:
+                        context['css_class'] += ' last'
+                        break
+
+            elif next_level < item.level:
+                context['up'] = item.level - next_level
+                context['css_class'] += ' last'
+
+            if prev_level < item.level:
+                context['css_class'] += ' first'
+
+            html = template.loader.get_template('incunafein/page/menuitem.html').render(context)
+            context.pop()
+
+            return html
+
+        items = list(entries)
+        item = items.pop(0)
+        prev_level = -1
+        while items:
+            output += get_next_item(item, items, prev_level)
+            prev_level = item.level
+            item = items.pop(0)
+
+        output += get_next_item(item, items, prev_level)
 
         if css_id:
             attrs = ' id="%s"' % css_id
@@ -145,9 +202,13 @@ class FeincmsPageMenuNode(template.Node):
 
         return entries
 
+    def ancestor_siblings(self, instance, level=1):
+        opts = instance._meta
+        ancestors = instance.get_ancestors().filter(in_navigation=True, level__gte=level-1)
+        return instance._tree_manager.filter(**{'in_navigation': True, '%s__in' % opts.parent_attr: ancestors})
+
 
     def entries(self, instance, level=1, depth=1, show_all_subnav=False):
-        opts = instance._meta
         if level <= 1:
             if depth == 1:
                 return Page.objects.toplevel_navigation()
@@ -155,7 +216,6 @@ class FeincmsPageMenuNode(template.Node):
                 return Page.objects.in_navigation().filter(level__lt=depth)
             else:
                 queryset = Page.objects.toplevel_navigation() | \
-                        instance.get_ancestors().filter(in_navigation=True) | \
                         instance.get_siblings(include_self=True).filter(in_navigation=True, level__lt=depth) | \
                         instance.children.filter(in_navigation=True, level__lt=depth)
                 return PageManager.apply_active_filters(queryset)
@@ -180,10 +240,8 @@ class FeincmsPageMenuNode(template.Node):
             toplevel = instance.get_descendants().filter(level__lte=instance.level + depth, in_navigation=True)
             return PageManager.apply_active_filters(queryset)
         else:
-            ancestors = instance.get_ancestors().filter(in_navigation=True, level__gte=level-1)
-            ancestor_siblings = instance._tree_manager.filter(**{'in_navigation': True, '%s__in' % opts.parent_attr: ancestors})
             queryset = instance.children.in_navigation() | \
-                     ancestor_siblings | \
+                     self.ancestor_siblings(instance, level=level) | \
                     instance.get_siblings(include_self=True).filter(in_navigation=True, level__gte=level-1, level__lte=instance.level + depth)
             if toplevel != instance:
                 queryset = queryset | toplevel.children.in_navigation()
