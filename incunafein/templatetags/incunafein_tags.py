@@ -101,6 +101,7 @@ class FeincmsPageMenuNode(template.Node):
 
             if context['is_current'] or is_equal_or_parent_of(item, feincms_page):
                 context['css_class'] += ' selected'
+                context['is_current_or_parent'] = True
 
             if next_level is None:
                 context['css_class'] += ' last'
