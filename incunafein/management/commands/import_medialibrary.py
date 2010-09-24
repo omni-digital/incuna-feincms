@@ -10,8 +10,13 @@ def import_path(path, parent_category=None):
         path = os.path.dirname(path)
         category_name = os.path.basename(path)
 
-    category, created = Category.objects.get_or_create(title=category_name, parent=parent_category)
-    if created:
+    if parent_category and parent_category.parent:
+        parent_category = parent_category.parent
+
+    try:
+        category = Category.objects.filter(title=category_name, parent=parent_category)[0]
+    except IndexError:
+        category = Category(title=category_name, parent=parent_category)
         category.save()
 
     for item in os.listdir(path):
