@@ -13,7 +13,7 @@ class BaseFkeyContent(models.Model):
 
     from incunafein.content import fkeycontent_factory
     from locations.models import LocationCategory    
-    Page.create_content_type(fkeycontent_factory(LocationCategory, fkey_name='location_category'))
+    Page.create_content_type(fkeycontent_factory(LocationCategory, field_name='location_category'))
 
     
     """
@@ -26,13 +26,13 @@ class BaseFkeyContent(models.Model):
         if cls.app_label not in settings.INSTALLED_APPS:
             raise ImproperlyConfigured, "You have to add '%s' to your INSTALLED_APPS before creating a %s" % (cls.app_label, cls.__name__)
 
-        cls.add_to_class(cls.fkey_name or cls.object_name.lower(),
+        cls.add_to_class(cls.field_name or cls.object_name.lower(),
             models.ForeignKey('%s.%s' % (cls.app_label, cls.object_name),
             related_name='%s_%s_set' % (cls._meta.app_label, cls._meta.module_name)
         ))
         
     def template_hierarchy(self):
-        return ['content/%s/%s.html' % (self.app_label, self.fkey_name or self.object_name.lower()),
+        return ['content/%s/%s.html' % (self.app_label, self.field_name or self.object_name.lower()),
                 'content/%s/default.html' % self.app_label,
                 ]
 
@@ -46,7 +46,23 @@ class BaseFkeyContent(models.Model):
         return render_to_string(self.template_hierarchy(), context)
 
 
-def fkeycontent_factory(model, content=BaseFkeyContent, model_name=None, fkey_name=None):
+class BaseM2MContent(BaseFkeyContent):
+
+    class Meta:
+        abstract = True
+
+    @classmethod
+    def initialize_type(cls):
+        if cls.app_label not in settings.INSTALLED_APPS:
+            raise ImproperlyConfigured, "You have to add '%s' to your INSTALLED_APPS before creating a %s" % (cls.app_label, cls.__name__)
+
+        cls.add_to_class(cls.field_name or cls.object_name.lower()+'s',
+            models.ManyToManyField('%s.%s' % (cls.app_label, cls.object_name),
+            related_name='%s_%s_set' % (cls._meta.app_label, cls._meta.module_name)
+        ))
+
+
+def related_content_factory(model, content, model_name=None, field_name=None):
     """Return a BaseFkeyContent for the label and name class."""
     opts = model._meta
     
@@ -55,9 +71,16 @@ def fkeycontent_factory(model, content=BaseFkeyContent, model_name=None, fkey_na
     
     attrs = {'app_label': opts.app_label,
              'object_name': opts.object_name,
-             'fkey_name': fkey_name,
+             'field_name': field_name,
              '__module__': model.__module__,
              'Meta': Meta,
-             
             }
     return type(model_name or model.__name__  + 'Content', (content,), attrs)
+
+
+def fkeycontent_factory(model, content=BaseFkeyContent, model_name=None, field_name=None):
+    return related_content_factory(model, content, model_name=model_name, field_name=field_name)
+
+def m2mcontent_factory(model, content=BaseM2MContent, model_name=None, field_name=None):
+    return related_content_factory(model, content, model_name=model_name, field_name=field_name)
+
