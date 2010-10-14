@@ -196,9 +196,9 @@ class FeincmsPageMenuNode(template.Node):
             toplevel = instance.get_ancestors()[level - 2]
 
         if depth == 1:
-            return instance.children.in_navigation()
+            return toplevel.children.in_navigation()
         elif show_all_subnav:
-            toplevel = instance.get_descendants().filter(level__lte=instance.level + depth, in_navigation=True)
+            queryset = toplevel.get_descendants().filter(level__lte=toplevel.level + depth, in_navigation=True)
             return PageManager.apply_active_filters(queryset)
         else:
             queryset = instance.children.in_navigation() | \
