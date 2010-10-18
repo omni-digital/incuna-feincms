@@ -44,7 +44,8 @@ def get_valid_templates(instance=None, parent=None):
     for t in templates.values():
         if hasattr(t, 'children') and t.children:
             for c in t.children:
-                del(templates[c])
+                if c in templates:
+                    del(templates[c])
                 
     return templates
 
