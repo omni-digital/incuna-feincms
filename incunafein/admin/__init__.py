@@ -28,22 +28,24 @@ def get_valid_templates(instance=None, parent=None):
 
     # copy of all the available templates
     templates = Page._feincms_templates.copy()
+    check_pages = None
 
     if parent:
         check_pages = (parent.get_ancestors(ascending=True) | Page.objects.filter(pk = parent.pk)) or [parent,]
     elif instance:
         check_pages = instance.get_ancestors(ascending=True)
-        if not check_pages:
-            return templates
-    else:
-        return templates
 
+    if check_pages:
+        for page in check_pages:
+            if hasattr(page.template, 'children'):
+                templates = dict([(templates[child].key, templates[child]) for child in page.template.children])
 
-
-    for page in check_pages:
-        if hasattr(page.template, 'children'):
-            return dict([(templates[child].key, templates[child]) for child in page.template.children])
-
+    # remove templates that are defined as children within the current set
+    for t in templates.values():
+        if hasattr(t, 'children') and t.children:
+            for c in t.children:
+                del(templates[c])
+                
     return templates
 
 
