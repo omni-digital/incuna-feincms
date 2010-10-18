@@ -209,7 +209,7 @@ class FeincmsPageMenuNode(template.Node):
             return PageManager.apply_active_filters(queryset)
 
 
-
+      
 def do_feincms_page_menu(parser, token):
     args = token.split_contents()
     if len(args) > 7:
