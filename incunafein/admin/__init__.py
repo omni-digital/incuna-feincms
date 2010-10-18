@@ -42,6 +42,8 @@ def get_valid_templates(instance=None, parent=None):
         if hasattr(page.template, 'children'):
             return dict([(page.key, page) for page in page.template.children])
 
+    return templates
+
 
 class PageAdminForm(PageAdminFormOld):
 
