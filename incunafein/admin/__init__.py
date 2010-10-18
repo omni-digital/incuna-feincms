@@ -38,9 +38,11 @@ def get_valid_templates(instance=None, parent=None):
     else:
         return templates
 
+
+
     for page in check_pages:
         if hasattr(page.template, 'children'):
-            return dict([(page.key, page) for page in page.template.children])
+            return dict([(templates[child].key, templates[child]) for child in page.template.children])
 
     return templates
 
