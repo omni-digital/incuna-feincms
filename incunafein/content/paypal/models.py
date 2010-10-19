@@ -18,6 +18,7 @@ class PaypalContent(models.Model):
     def render(self, **kwargs):
         paypal_email = settings.PAYPAL_EMAIL
         paypal_url = getattr(settings, 'PAYPAL_URL', 'https://www.paypal.com/cgi-bin/webscr')
+        paypal_vat = getattr(settings, 'PAYPAL_VAT', None)
         self.site = Site.objects.get_current()
         request = kwargs.get('request')
 
