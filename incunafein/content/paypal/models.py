@@ -7,7 +7,7 @@ from django.template import RequestContext
 
 
 class PaypalContent(models.Model):
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200,help_text=_('This will be used before the paypal buy now buttons and on the paypal shopping cart.'))
     price = models.DecimalField(max_digits=6,decimal_places=2)
 
     class Meta:
