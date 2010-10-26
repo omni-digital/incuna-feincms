@@ -30,6 +30,9 @@ def get_valid_templates(instance=None, parent=None):
     templates = Page._feincms_templates.copy()
     check_pages = None
 
+    if not isinstance(parent, Page):
+        parent = Page.objects.get(pk=parent)
+
     if parent:
         check_pages = (parent.get_ancestors(ascending=True) | Page.objects.filter(pk = parent.pk)) or [parent,]
     elif instance:
