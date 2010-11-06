@@ -2,6 +2,7 @@ from distutils.core import setup
 setup(
     name = "incunafein",
     packages = ["incunafein", ],
+    include_package_data=True,
     version = "0.1",
     description = "Provides enhancements to FeinCMS.",
     author = "Incuna Ltd",
