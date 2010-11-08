@@ -218,3 +218,88 @@ def do_feincms_page_menu(parser, token):
 
 register.tag('feincms_page_menu', do_feincms_page_menu)
 
+
+class MediaFilesNode(template.Node):
+    """
+    example usage:
+        {% mediafiles feincms_page as varname grouped=True %}
+    """
+    def __init__(self, feincms_page, var_name=None, **kwargs):
+        self.feincms_page = feincms_page
+        self.var_name = var_name
+        self.kwargs = kwargs
+
+    def render(self, context):
+        feincms_page = self.feincms_page.resolve(context)
+
+        files = feincms_page.media_files.all()
+
+        opts = {}
+        for key in self.kwargs:
+            opts[key] = self.kwargs[key].resolve(context) or self.kwargs[key]
+
+        grouped = opts.get('grouped', False)
+        if grouped:
+            # regroup the files by category
+            
+            grouped = {}
+            categories = []
+            empty_title = "Uncategorised"
+            for file in files:
+                cats = file.categories.all()
+                if not cats:
+                    if not empty_title in grouped:
+                        grouped[empty_title] = []
+                        categories.append(empty_title)
+                    grouped[empty_title].append(file)
+
+                for category in cats:
+                    if not category.title in grouped:
+                        grouped[category.title] = []
+                        categories.append(category.title)
+                    grouped[category.title].append(file)
+
+
+            results = [{'grouper': c, 'list': grouped[c]} for c in categories]
+        else:
+            results = files
+
+
+        if self.var_name:
+            context[self.var_name] = results
+            return u''
+
+        context.push()
+        context['mediafiles'] = files
+        context['regrouped'] = results
+        context['grouped'] = grouped
+        html = template.loader.get_template('incunafein/page/mediafiles.html').render(context)
+        context.pop()
+
+        return html
+
+@register.tag
+def mediafiles(parser, token):
+    bits = token.contents.split()
+
+    if len(bits) < 2:
+        raise template.TemplateSyntaxError("'%s' tag takes at least one arguments" % bits[0])
+    if bits[2] == 'as':
+        firstkey = 4
+        varname = bits[3]
+    else:
+        firstkey = 2
+        varname = None
+
+    dict = {}
+    try:
+        for pair in bits[firstkey:]:
+            pair = pair.split('=')
+            dict[str(pair[0])] = parser.compile_filter(pair[1])
+    except TypeError:
+        raise template.TemplateSyntaxError('Bad keyed argument "%s" for tag "%s"' % (pair, bits[0]))
+    
+
+    return MediaFilesNode(parser.compile_filter(bits[1]), varname, **dict)
+
+

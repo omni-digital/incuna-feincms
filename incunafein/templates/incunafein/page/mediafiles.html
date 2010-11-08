@@ -1,0 +1,21 @@
+{% if grouped %}
+<dl>
+    {% for group in regrouped %}
+    <dt>{{ group.grouper }}</dt>
+    <dd>
+        <ul>
+            {% for mediafile in group.list %}
+            <li><a href="{{ mediafile.get_absolute_url }}">{{ mediafile }}</a></li>
+            {% endfor %}
+        </ul>
+    </dd>
+    {% endfor %}
+</dl>
+{% else %}
+<ul>
+    {% for mediafile in mediafiles %}
+    <li><a href="{{ mediafile.get_absolute_url }}">{{ mediafile }}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}
+
