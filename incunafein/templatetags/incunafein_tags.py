@@ -1,6 +1,7 @@
 from django import template
 from feincms.module.page.models import Page, PageManager
 from feincms.module.page.templatetags.feincms_page_tags import is_equal_or_parent_of
+from feincms.module.medialibrary.models import Category
 
 register = template.Library()
 
@@ -244,7 +245,7 @@ class MediaFilesNode(template.Node):
             
             grouped = {}
             categories = []
-            empty_title = "Uncategorised"
+            empty_title = "Other documents"
             for file in files:
                 cats = file.categories.all()
                 if not cats:
@@ -260,7 +261,9 @@ class MediaFilesNode(template.Node):
                     grouped[category.title].append(file)
 
 
-            results = [{'grouper': c, 'list': grouped[c]} for c in categories]
+            results = [{'grouper': c, 'list': grouped[c.title]} for c in Category.objects.filter(mediafile__in=files).distinct()]
+            if empty_title in grouped:
+                results.append({'grouper': empty_title, 'list': grouped[empty_title]})
         else:
             results = files
 
