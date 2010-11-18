@@ -47,9 +47,11 @@ class FeincmsPageMenuNode(template.Node):
     example usage:
         {% feincms_page_menu  feincms_page 'nav' 1 2 %}
     """
-    def __init__(self,  feincms_page, css_id="", level=1, depth=1, show_all_subnav=False, extended=False):
+    #(self,  feincms_page, css_id="", level=1, depth=1, show_all_subnav=False, extended=False, css_class_prefix="", )
+    def __init__(self,  feincms_page, css_id="", level=1, depth=1, show_all_subnav=False, extended=False, css_class_prefix=""):
         self.feincms_page = feincms_page
         self.css_id = css_id
+        self.css_class_prefix = css_class_prefix
         self.level = level
         self.depth = depth
         self.show_all_subnav = show_all_subnav
@@ -65,6 +67,7 @@ class FeincmsPageMenuNode(template.Node):
         level = int(self.level.resolve(context)if isinstance(self.level, template.FilterExpression) else self.level)
         depth = int(self.depth.resolve(context) if isinstance(self.depth, template.FilterExpression) else self.depth)
         css_id = self.css_id.resolve(context) if isinstance(self.css_id, template.FilterExpression) else self.css_id
+        css_class_prefix = self.css_class_prefix.resolve(context) if isinstance(self.css_class_prefix, template.FilterExpression) else self.css_class_prefix
         show_all_subnav = self.show_all_subnav.resolve(context) if isinstance(self.show_all_subnav, template.FilterExpression) else self.show_all_subnav
         extended = self.extended.resolve(context) if isinstance(self.extended, template.FilterExpression) else self.extended
 
@@ -96,9 +99,9 @@ class FeincmsPageMenuNode(template.Node):
             context['title'] = item.title
 
             if 'css_class' in context:
-                context['css_class'] += ' ' + item.slug
+                context['css_class'] += ' ' + css_class_prefix+item.slug
             else:
-                context['css_class'] = item.slug
+                context['css_class'] = css_class_prefix+item.slug
 
             if context['is_current'] or is_equal_or_parent_of(item, feincms_page):
                 context['css_class'] += ' selected'
@@ -212,10 +215,24 @@ class FeincmsPageMenuNode(template.Node):
 
       
 def do_feincms_page_menu(parser, token):
-    args = token.split_contents()
-    if len(args) > 7:
+    bits = token.split_contents()
+
+    if len(bits) > 7:
         raise template.TemplateSyntaxError("'%s tag accepts no more than 6 arguments." % args[0])
-    return FeincmsPageMenuNode(*map(parser.compile_filter, args[1:]))
+
+    kwargs = {}
+    args = []
+    try:
+        for bit in bits[1:]:
+            try:
+                pair = bit.split('=')
+                kwargs[str(pair[0])] = parser.compile_filter(pair[1])
+            except IndexError:
+                args.append(parser.compile_filter(bit))
+    except TypeError:
+        raise template.TemplateSyntaxError('Bad arguments for tag "%s"' % bits[0])
+
+    return FeincmsPageMenuNode(*args, **kwargs)
 
 register.tag('feincms_page_menu', do_feincms_page_menu)
 
