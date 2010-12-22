@@ -1,0 +1,34 @@
+[
+    {
+        "pk": 1,
+        "model": "navigation.navigation",
+        "fields": {
+            "rght": 8,
+            "parent": null,
+            "title": "Footer",
+            "url": "",
+            "css_class": "",
+            "level": 0,
+            "lft": 1,
+            "dom_id": "nav-footer",
+            "tree_id": 1,
+            "page": null
+        }
+    },
+    {
+        "pk": 2,
+        "model": "navigation.navigation",
+        "fields": {
+            "rght": 6,
+            "parent": null,
+            "title": "Sub",
+            "url": "",
+            "css_class": "",
+            "level": 0,
+            "lft": 1,
+            "dom_id": "nav-sub",
+            "tree_id": 2,
+            "page": null
+        }
+    }
+]
