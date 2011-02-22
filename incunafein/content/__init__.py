@@ -32,7 +32,9 @@ class BaseFkeyContent(models.Model):
         ))
         
     def template_hierarchy(self):
-        return ['content/%s/%s.html' % (self.app_label, self.field_name or self.object_name.lower()),
+        return ['content/%s/%s-%s.html' % (self.app_label, self.region, self.field_name or self.object_name.lower()),
+                'content/%s/%s.html' % (self.app_label, self.field_name or self.object_name.lower()),
+                'content/%s/%s.html' % (self.app_label, self.region),
                 'content/%s/default.html' % self.app_label,
                 ]
 
