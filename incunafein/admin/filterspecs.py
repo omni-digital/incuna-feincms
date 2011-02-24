@@ -1,29 +1,46 @@
-from django.contrib.admin.filterspecs import FilterSpec, ChoicesFilterSpec
+from django.contrib.admin.filterspecs import FilterSpec, RelatedFilterSpec
 from django.utils.encoding import smart_unicode
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
 def is_mptt(m):
-    return getattr(m._meta, 'tree_id_attr', False) and getattr(m._meta, 'left_attr', False) and getattr(m._meta, 'right_attr', False)
+    is_it = bool(getattr(m._meta, 'tree_id_attr', False) \
+                 and getattr(m._meta, 'parent_attr', False) \
+                 and getattr(m._meta, 'left_attr', False) \
+                 and getattr(m._meta, 'right_attr', False) \
+                 and getattr(m._meta, 'level_attr', False))
 
-class MPTTFilterSpec(ChoicesFilterSpec):
+    return is_it
+
+class MPTTFilterSpec(RelatedFilterSpec):
     def __init__(self, f, request, params, model, model_admin):
         from feincms.utils import shorten_string
 
         super(MPTTFilterSpec, self).__init__(f, request, params, model, model_admin)
-        opts = model._meta
 
-        mppt_lookups = {opts.tree_id_attr: '%s__exact' % opts.tree_id_attr, 
-                        opts.left_attr: '%s__gte' % opts.left_attr, 
-                        opts.right_attr: '%s__lte' % opts.left_attr}
+        to = f.rel.to
+        opts = to._meta
+
+
+        mppt_lookups = {opts.tree_id_attr: '%s__exact' % (opts.tree_id_attr), 
+                        opts.left_attr: '%s__gte' % (opts.left_attr), 
+                        opts.right_attr: '%s__lte' % (opts.left_attr)}
+
+
+        parents = to.objects.all()
+        if f.name == opts.parent_attr:
+            parent_id = "%s__id" % opts.parent_attr
+            parent_ids = to.objects.exclude(parent=None).values_list(parent_id, flat=True).order_by(parent_id).distinct()
+            parents = parents.filter(pk__in=parent_ids)
+            self.title_suffix = ''
+        else:
+            self.title_suffix = ' ' + unicode(super(MPTTFilterSpec, self).title())
+            for k, v in mppt_lookups.items():
+                mppt_lookups[k] = "%s__%s" % (f.name, v)
+
 
         self.lookup_kwargs = mppt_lookups.values()
-
         self.lookup_params = dict([(k, request.GET.get(k, None)) for k in self.lookup_kwargs])
-
-
-        parent_ids = model.objects.exclude(parent=None).values_list("parent__id", flat=True).order_by("parent__id").distinct()
-        parents = model.objects.filter(pk__in=parent_ids)
         self.lookup_choices = [("%s%s" % ("&nbsp;" * getattr(parent, opts.level_attr), shorten_string(unicode(parent), max_length=25)), 
                                 dict([(lookup, str(getattr(parent, kwarg))) for kwarg,lookup in mppt_lookups.items()]))
                                for parent in parents]
@@ -44,10 +61,8 @@ class MPTTFilterSpec(ChoicesFilterSpec):
 
 
     def title(self):
-        return _('Ancestor')
+        return _('Ancestor') + self.title_suffix
 
 
 # registering the filter
-FilterSpec.filter_specs.insert(0,
-    (lambda f: bool(f.rel) and is_mptt(f.rel.to), MPTTFilterSpec)
-    )
+FilterSpec.filter_specs.insert(0, (lambda f: bool(f.rel) and is_mptt(f.rel.to), MPTTFilterSpec))
