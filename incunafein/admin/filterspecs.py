@@ -3,8 +3,6 @@ from django.utils.encoding import smart_unicode
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
-#from feincms.admin.filterspecs import ParentFilterSpec
-
 def is_mptt(m):
     return getattr(m._meta, 'tree_id_attr', False) and getattr(m._meta, 'left_attr', False) and getattr(m._meta, 'right_attr', False)
 
@@ -25,9 +23,9 @@ class MPTTFilterSpec(ChoicesFilterSpec):
 
 
         parent_ids = model.objects.exclude(parent=None).values_list("parent__id", flat=True).order_by("parent__id").distinct()
-        parents = model.objects.filter(pk__in=parent_ids).values("title", "level", *mppt_lookups.keys())
-        self.lookup_choices = [("%s%s" % ("&nbsp;" * parent['level'], shorten_string(parent['title'], max_length=25)), 
-                                dict([(lookup, str(parent[kwarg])) for kwarg,lookup in mppt_lookups.items()]))
+        parents = model.objects.filter(pk__in=parent_ids)
+        self.lookup_choices = [("%s%s" % ("&nbsp;" * getattr(parent, opts.level_attr), shorten_string(unicode(parent), max_length=25)), 
+                                dict([(lookup, str(getattr(parent, kwarg))) for kwarg,lookup in mppt_lookups.items()]))
                                for parent in parents]
 
     def choices(self, cl):
