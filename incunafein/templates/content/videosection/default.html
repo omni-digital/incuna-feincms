@@ -1,0 +1,2 @@
+{% with content.title|default:content.video_mediafile.translation.caption as title %}{% if title %}<h2>{{ title }}</h2>{% endif %}{% endwith %}
+<a href="{{ content.video_mediafile.file.url }}">{% if content.preview_mediafile %}<img src="{{ content.preview_mediafile.file.url }}"/>{% else %}{{ content.video_mediafile }}{% endif %}</a>
