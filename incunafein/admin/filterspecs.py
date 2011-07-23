@@ -4,31 +4,31 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
 def is_mptt(m):
-    is_it = bool(getattr(m._meta, 'tree_id_attr', False) \
+    # Does it quack?
+    return bool(getattr(m._meta, 'tree_id_attr', False) \
                  and getattr(m._meta, 'parent_attr', False) \
                  and getattr(m._meta, 'left_attr', False) \
                  and getattr(m._meta, 'right_attr', False) \
                  and getattr(m._meta, 'level_attr', False))
 
-    return is_it
-
 class MPTTFilterSpec(RelatedFilterSpec):
-    def __init__(self, f, request, params, model, model_admin):
+    def __init__(self, f, request, params, model, model_admin, field_path=None, **kwargs):
         from feincms.utils import shorten_string
 
-        super(MPTTFilterSpec, self).__init__(f, request, params, model, model_admin)
+        super(MPTTFilterSpec, self).__init__(f, request, params, model, model_admin, field_path=field_path)
+
+        if getattr(self, 'field_path', None) is None:
+            self.field_path = f.name
 
         to = f.rel.to
         opts = to._meta
-
 
         mppt_lookups = {opts.tree_id_attr: '%s__exact' % (opts.tree_id_attr), 
                         opts.left_attr: '%s__gte' % (opts.left_attr), 
                         opts.right_attr: '%s__lte' % (opts.left_attr)}
 
-
         parents = to.objects.all()
-        if f.name == opts.parent_attr:
+        if self.field_path == opts.parent_attr:
             parent_id = "%s__id" % opts.parent_attr
             parent_ids = to.objects.exclude(parent=None).values_list(parent_id, flat=True).order_by(parent_id).distinct()
             parents = parents.filter(pk__in=parent_ids)
@@ -36,7 +36,7 @@ class MPTTFilterSpec(RelatedFilterSpec):
         else:
             self.title_suffix = ' ' + unicode(super(MPTTFilterSpec, self).title())
             for k, v in mppt_lookups.items():
-                mppt_lookups[k] = "%s__%s" % (f.name, v)
+                mppt_lookups[k] = "%s__%s" % (self.field_path, v)
 
 
         self.lookup_kwargs = mppt_lookups.values()
@@ -66,3 +66,6 @@ class MPTTFilterSpec(RelatedFilterSpec):
 
 # registering the filter
 FilterSpec.filter_specs.insert(0, (lambda f: bool(f.rel) and is_mptt(f.rel.to), MPTTFilterSpec))
+#FilterSpec.register(lambda f: bool(f.rel) and is_mptt(f.rel.to), 
+#                    MPTTFilterSpec)
+
