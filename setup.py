@@ -1,6 +1,6 @@
 from distutils.core import setup
 setup(
-    name = "incunafein",
+    name = "incuna-feincms",
     packages = ["incunafein", ],
     include_package_data=True,
     version = "0.1",
