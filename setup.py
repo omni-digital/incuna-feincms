@@ -5,7 +5,7 @@ setup(
     name = "incuna-feincms",
     packages = find_packages(),
     include_package_data=True,
-    version = "0.2",
+    version = get_version(),
     description = "Provides enhancements to FeinCMS.",
     author = "Incuna Ltd",
     author_email = "admin@incuna.com",
