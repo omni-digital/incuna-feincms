@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 
+from incunafein import get_version
 setup(
     name = "incuna-feincms",
     packages = find_packages(),
