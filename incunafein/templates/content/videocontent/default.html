@@ -1,0 +1,23 @@
+{% load videotags %}
+<div class="video-content position-{{ content.position}}">
+    {% video content.video %}
+{% comment %}
+{% with chapters=content.video.chapter_set.all %}
+    <h3>{{ content.video.title }}</h3>
+    <video controls>
+        {% for source in content.video.source_set.all %}<source src="{{ source.file.url }}"  type='{{ source.type }}'>{% endfor %}
+        Your browser does not support the video tag.
+    </video>
+    {% if chapters %}
+    <div class="chapters">
+        <ul>
+            {% for chapter in chapters %}
+                <li><a id="chapter-{{ chapter.pk }}" href="#{{ chapter.seconds }}">{{ chapter.title }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    {% if content.video.recorded %}Date: {{ content.video.recorded|date }}{% endif %}
+{% endwith %}
+{% endcomment %}
+</div>
