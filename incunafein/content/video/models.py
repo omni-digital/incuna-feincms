@@ -10,13 +10,20 @@ from feincms.admin.editor import ItemEditorForm
 
 # FeinCMS connector
 class VideoContent(models.Model):
-    video = models.ForeignKey('videos.video',
-                              #related_name='%s_%s_set' % (cls._meta.app_label, cls._meta.module_name)
-                             )
+    video = models.ForeignKey('videos.video')
 
     class Meta:
         abstract = True
 
+    @property
+    def media(self):
+        return forms.Media(
+            js=(
+                settings.STATIC_URL+'videos/scripts/flowplayer-3.2.6.min.js',
+                settings.STATIC_URL+'incuna/script/flowplayer.plugins.js',
+                settings.STATIC_URL+'videos/scripts/videos.js',
+            ),
+        )
 
     @classmethod
     def initialize_type(cls, POSITION_CHOICES=None):
