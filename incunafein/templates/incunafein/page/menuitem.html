@@ -1,8 +1,8 @@
 <li class="{{ css_class }}">
 {% if is_current %}
-    <span>{{ title }}</span>
+    <span>{{ title|safe }}</span>
 {% else %}
-    <a href="{{ url }}"><span>{{ title }}</span></a>
+    <a href="{{ url }}"><span>{{ title|safe }}</span></a>
 {% endif %}
 {% if down %}
     {% for i in down|as_range %}<ul>{% endfor %}
