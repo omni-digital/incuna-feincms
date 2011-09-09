@@ -2,10 +2,17 @@ from django.contrib import admin
 from incunafein.admin import editor
 from models import Navigation
 from django import forms
-#from django.conf import settings
+from django.utils.safestring import mark_safe
+from feincms.module.page.models import Page
 
+class MPTTModelChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        opts = obj._meta
+        return mark_safe("%s%s" % ("&nbsp;&nbsp;" * getattr(obj, opts.level_attr), unicode(obj)))
 
 class NavigationForm(forms.ModelForm):
+    page = MPTTModelChoiceField(queryset=Page.objects, required=False)
+    parent = MPTTModelChoiceField(queryset=Navigation.objects, required=False)
 
     class Meta:
         models = Navigation
@@ -29,6 +36,10 @@ class NavigationForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = self.cleaned_data
+        
+        if self._errors:
+            return cleaned_data
+
         parent = cleaned_data.get("parent")
         page = cleaned_data.get("page")
         url = cleaned_data.get("url")
@@ -56,7 +67,7 @@ class NavigationForm(forms.ModelForm):
                 self._errors["dom_id"] = self.error_class([msg])
      
                 del cleaned_data["parent"]
-                del cleaned_data["dom_id"]
+                #del cleaned_data["dom_id"]
 
 
         return cleaned_data

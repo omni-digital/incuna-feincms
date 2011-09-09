@@ -16,9 +16,9 @@ class Navigation(models.Model):
 
     page = models.ForeignKey('page.Page', null=True, blank=True, help_text="Leave blank to create a top level navigation.")
     title = models.CharField(max_length=250, null=True, blank=True, help_text="Leave blank to use the page title.")
-    url = models.URLField(verify_exists=False, max_length=250, null=True, blank=True, help_text="Set either the page or url.")
+    url = models.URLField(verify_exists=False, max_length=250, null=True, blank=True, help_text="Set either the page or url, not both.")
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', help_text="Leave blank to create a top level navigation.")
-    dom_id = models.CharField(max_length=250, null=True, blank=True, help_text="This must be set for a top level navigation.")
+    dom_id = models.CharField(max_length=250, null=True, blank=True, help_text="This is used to identify the navigation and must be set for a top level navigation.")
     css_class = models.CharField(max_length=250, null=True, blank=True)
 
     #objects = NavigationManager()
