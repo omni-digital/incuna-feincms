@@ -1,4 +1,5 @@
 from django import template
+from django.template.defaultfilters import stringfilter
 from feincms.module.page.models import Page, PageManager
 from feincms.module.page.templatetags.feincms_page_tags import is_equal_or_parent_of
 from feincms.module.medialibrary.models import Category
@@ -322,4 +323,17 @@ def mediafiles(parser, token):
 
     return MediaFilesNode(parser.compile_filter(bits[1]), varname, **dict)
 
+
+@stringfilter
+def filename_only(value):
+    """Just return the filename component"""
+    return value.split("/")[-1].replace("_", " ").replace("-", " ")
+register.filter('filename_only', filename_only)
+
+
+@stringfilter
+def verbose_filetype(value):
+    if value in FILETYPES.keys():
+        return FILETYPES[value]
+register.filter('verbose_filetype', verbose_filetype)
 
