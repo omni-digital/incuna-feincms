@@ -3,16 +3,16 @@ from django.db import models
 def register(cls, admin_cls):
     cls.add_to_class('_prepared_date', models.TextField('Date of Preparation', blank=True, null=True))
 
-    def getter():
-        if not cls._prepared_date:
+    def getter(obj):
+        if not obj._prepared_date:
             try:
-                return cls.get_ancestors(ascending=True).filter(_prepared_date__isnull=False)[0]._prepared_date
+                return obj.get_ancestors(ascending=True).filter(_prepared_date__isnull=False)[0]._prepared_date
             except IndexError:
                 return None
-        return cls._prepared_date
+        return obj._prepared_date
 
-    def setter(value):
-        cls._prepared_date = value
+    def setter(obj, value):
+        obj._prepared_date = value
 
     cls.prepared_date = property(getter, setter)
 
