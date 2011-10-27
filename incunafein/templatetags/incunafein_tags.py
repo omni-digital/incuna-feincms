@@ -3,8 +3,6 @@ from feincms.module.page.models import Page, PageManager
 from feincms.module.page.templatetags.feincms_page_tags import is_equal_or_parent_of
 from feincms.module.medialibrary.models import Category
 
-from _filetypes import FILETYPES
-
 register = template.Library()
 
 class GetFeincmsPageNode(template.Node):
