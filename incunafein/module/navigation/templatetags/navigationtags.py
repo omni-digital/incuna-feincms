@@ -66,11 +66,14 @@ class IncunaFeinNavigationNode(template.Node):
                 else:
                     context['css_class'] = css_class
 
+            context['is_ancestor'] = False
             if context['is_current']:
                 if 'css_class' in context:
                     context['css_class'] += ' selected'
                 else:
                     context['css_class'] = 'selected'
+            else:
+                context['is_ancestor'] = path.startswith(context['url'])
 
             if next_level > item.level:
                 context['down'] = next_level - item.level
