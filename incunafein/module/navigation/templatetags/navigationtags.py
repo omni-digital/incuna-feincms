@@ -31,7 +31,7 @@ class IncunaFeinNavigationNode(template.Node):
             try:
                 instance = Navigation.objects.get(dom_id=navigate)
             except Navigation.DoesNotExist, er:
-                return
+                return ''
 
         if not 'request' in context:
             raise ValueError("No request in the context. Try using RequestContext in the view.")
