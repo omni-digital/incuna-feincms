@@ -180,7 +180,11 @@ class FeincmsPageMenuNode(template.Node):
             elif show_all_subnav:
                 return Page.objects.in_navigation().filter(level__lt=depth)
             else:
-                queryset = Page.objects.toplevel_navigation() | \
+                queryset = Page.objects.toplevel_navigation()
+                if instance.level > 1:
+                    # Get the ancestors begtween this level and top of tree
+                    queryset = queryset | instance.get_ancestors()
+                queryset = queryset | \
                         instance.get_siblings(include_self=True).filter(in_navigation=True, level__lt=depth) | \
                         instance.children.filter(in_navigation=True, level__lt=depth)
                 return PageManager.apply_active_filters(queryset)
