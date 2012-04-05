@@ -182,8 +182,9 @@ class FeincmsPageMenuNode(template.Node):
             else:
                 queryset = Page.objects.toplevel_navigation()
                 if instance.level > 1:
-                    # Get the ancestors begtween this level and top of tree
-                    queryset = queryset | instance.get_ancestors()
+                    # Get the ancestors (and their direct children) between 
+                    # this level and top of tree.
+                    queryset = queryset | self.ancestor_siblings(instance)
                 queryset = queryset | \
                         instance.get_siblings(include_self=True).filter(in_navigation=True, level__lt=depth) | \
                         instance.children.filter(in_navigation=True, level__lt=depth)
@@ -210,7 +211,7 @@ class FeincmsPageMenuNode(template.Node):
             return PageManager.apply_active_filters(queryset)
         else:
             queryset = instance.children.in_navigation() | \
-                     self.ancestor_siblings(instance, level=level) | \
+                    self.ancestor_siblings(instance, level=level) | \
                     instance.get_siblings(include_self=True).filter(in_navigation=True, level__gte=level-1, level__lte=instance.level + depth)
             if toplevel != instance:
                 queryset = queryset | toplevel.children.in_navigation()
