@@ -150,6 +150,7 @@ class FeincmsPageMenuNode(template.Node):
         return '<ul%s>%s</ul>' % (attrs, output)
 
     def what(self, instance, level=1, depth=1, show_all_subnav=False, extended=False):
+        mptt_limit = level + depth - 1 # adjust limit to mptt level indexing
 
         entries = self.entries(instance, level, depth, show_all_subnav)
 
@@ -157,13 +158,28 @@ class FeincmsPageMenuNode(template.Node):
             _entries = list(entries)
             entries = []
 
-            for entry in _entries:
-                entries.append(entry)
+            extended_node_rght = [] # rght value of extended node.
+                                    # used to filter out children of
+                                    # nodes sporting a navigation extension
 
-                if getattr(entry, 'navigation_extension', None):
-                    entries.extend(entry.extended_navigation(depth=depth,
-                                                             request=self.render_context.get('request', None),
-                                                             show_all_subnav=show_all_subnav))
+            for entry in _entries:
+                if (show_all_subnav or entry==instance) and getattr(entry, 'navigation_extension', None):
+                    entries.append(entry)
+                    extended_node_rght.append(entry.rght)
+
+                    entries.extend(e for e in entry.extended_navigation(depth=depth,
+                        request=self.render_context.get('request', None),
+                        show_all_subnav=show_all_subnav)
+                        if getattr(e, 'level', 0) < mptt_limit)
+
+                else:
+                    if extended_node_rght:
+                        if entry.rght < extended_node_rght[-1]:
+                            continue
+                        else:
+                            extended_node_rght.pop()
+
+                    entries.append(entry)
 
         return entries
 
