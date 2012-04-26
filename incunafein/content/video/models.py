@@ -10,10 +10,11 @@ from feincms.admin.editor import ItemEditorForm
 
 # FeinCMS connector
 class VideoContent(models.Model):
-    video = models.ForeignKey('videos.video')
 
     class Meta:
         abstract = True
+        verbose_name = _('video')
+        verbose_name_plural = _('videos')
 
     @property
     def media(self):
@@ -33,6 +34,9 @@ class VideoContent(models.Model):
         if POSITION_CHOICES is None:
             raise ImproperlyConfigured, 'You need to set POSITION_CHOICES when creating a %s' % cls.__name__
 
+        cls.add_to_class('video', models.ForeignKey('videos.video', verbose_name=_('video'),
+            related_name='%s_%s_set' % (cls._meta.app_label, cls._meta.module_name)
+            ))
 
         cls.add_to_class('position', models.CharField(_('position'),
             max_length=10, choices=POSITION_CHOICES,
