@@ -53,6 +53,8 @@ class VideoContent(models.Model):
     def render(self, **kwargs):
         request = kwargs.get('request')
         return render_to_string([
+            'content/videocontent/%s/%s.html' % (self.region, self.position),
+            'content/videocontent/%s/default.html' % self.region,
             'content/videocontent/%s.html' % self.position,
             'content/videocontent/default.html',
             ], { 'content': self, 'request': request })
