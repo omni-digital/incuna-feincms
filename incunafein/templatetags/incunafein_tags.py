@@ -1,4 +1,4 @@
-ffrom django import template
+from django import template
 from feincms.module.page.models import Page, PageManager
 from feincms.module.page.templatetags.feincms_page_tags import is_equal_or_parent_of
 from feincms.module.medialibrary.models import Category
