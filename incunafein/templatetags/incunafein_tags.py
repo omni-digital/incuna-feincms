@@ -344,7 +344,7 @@ def mediafiles(parser, token):
     return MediaFilesNode(parser.compile_filter(bits[1]), varname, **dict)
 
 
-@register.inclusion_tag('search/page/_includes/render_all_regions.txt')
+@register.inclusion_tag('search/page/indexes/_includes/render_all_regions.txt')
 def render_all_regions(page):
     return {
         'regions': [getattr(page.content, region.key) for region in page.template.regions]
