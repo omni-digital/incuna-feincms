@@ -1,0 +1,3 @@
+{% for region in regions %}{% for content in region %}
+{{ content.render }}
+{% endfor %}{% endfor %}

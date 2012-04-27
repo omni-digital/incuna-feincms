@@ -1,4 +1,4 @@
-from django import template
+ffrom django import template
 from feincms.module.page.models import Page, PageManager
 from feincms.module.page.templatetags.feincms_page_tags import is_equal_or_parent_of
 from feincms.module.medialibrary.models import Category
@@ -342,3 +342,10 @@ def mediafiles(parser, token):
     
 
     return MediaFilesNode(parser.compile_filter(bits[1]), varname, **dict)
+
+
+@register.inclusion_tag('search/page/_includes/render_all_regions.txt')
+def render_all_regions(page):
+    return {
+        'regions': [getattr(page.content, region.key) for region in page.template.regions]
+    }

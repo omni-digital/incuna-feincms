@@ -1,0 +1,7 @@
+{% load incunafein_tags %}
+
+{{ object.title }}
+{{ object.content_title }}
+{{ object.content_subtitle }}
+
+{% render_all_regions feincms_page %}
