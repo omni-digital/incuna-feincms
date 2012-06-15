@@ -1,5 +1,9 @@
 from feincms.module.page.models import Page, PageAdmin as PageAdminOld
-from feincms.module.page.models import PageAdminForm as PageAdminFormOld
+try:
+    from feincms.module.page.forms import PageAdminForm as PageAdminFormOld
+except ImportError:
+    # this is for FeinCMS<=1.5 compat when PageAdminFrom was located elsewhere
+    from feincms.module.page.models import PageAdminForm as PageAdminFormOld
 from django.utils.safestring import mark_safe
 from django.contrib.admin.widgets import ForeignKeyRawIdWidget
 from django.conf.urls.defaults import patterns
