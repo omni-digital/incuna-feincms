@@ -1,9 +1,10 @@
 from django import template
+from feincms.module.medialibrary.models import Category
 from feincms.module.page.models import Page, PageManager
 from feincms.module.page.templatetags.feincms_page_tags import is_equal_or_parent_of
-from feincms.module.medialibrary.models import Category
 
 register = template.Library()
+
 
 class GetFeincmsPageNode(template.Node):
     """
@@ -16,12 +17,12 @@ class GetFeincmsPageNode(template.Node):
 
     def render(self, context):
         self.path = self.path.resolve(context)
-        try: 
+        try:
             context[self.var_name] = Page.objects.page_for_path(path=self.path)
         except Page.DoesNotExist:
             pass
-
         return u''
+
 
 def get_feincms_page(parser, token):
     bits = token.contents.split()
@@ -29,15 +30,15 @@ def get_feincms_page(parser, token):
         raise template.TemplateSyntaxError("'%s' tag takes three arguments" % bits[0])
     if bits[2] != 'as':
         raise template.TemplateSyntaxError("second argument to '%s' tag must be 'as'" % bits[0])
-
     return GetFeincmsPageNode(bits[1], bits[3])
 
 register.tag('get_feincms_page', get_feincms_page)
 
+
 class FeincmsPageMenuNode(template.Node):
     """
     Render the page navigation.
-    arguments: 
+    arguments:
         feincms_page: The current feincms_page.
         css_id: The css (dom) id to be used for the menu.
         level: The level at which to start the navigation.
@@ -45,9 +46,9 @@ class FeincmsPageMenuNode(template.Node):
         show_all_subnav: Whether to show all sub navigation items (or just the ones in the current pages branch).
         extended: Whether the navigation has been extended (to enable third party apps to exgtend the navigation).
     example usage:
-        {% feincms_page_menu  feincms_page 'nav' 1 2 %}
+        {% feincms_page_menu feincms_page 'nav' 1 2 %}
     """
-    #(self,  feincms_page, css_id="", level=1, depth=1, show_all_subnav=False, extended=False, css_class_prefix="", )
+    #(self, feincms_page, css_id="", level=1, depth=1, show_all_subnav=False, extended=False, css_class_prefix="")
     def __init__(self,  feincms_page, css_id="", level=1, depth=1, show_all_subnav=False, extended=False, css_class_prefix=""):
         self.feincms_page = feincms_page
         self.css_id = css_id
@@ -89,7 +90,6 @@ class FeincmsPageMenuNode(template.Node):
             else:
                 next_level = None
 
-
             if extra_context:
                 context.update(extra_context)
 
@@ -99,9 +99,9 @@ class FeincmsPageMenuNode(template.Node):
             context['title'] = item.title
 
             if 'css_class' in context:
-                context['css_class'] += ' ' + css_class_prefix+item.slug
+                context['css_class'] += ' ' + css_class_prefix + item.slug
             else:
-                context['css_class'] = css_class_prefix+item.slug
+                context['css_class'] = css_class_prefix + item.slug
 
             if context['is_current'] or is_equal_or_parent_of(item, feincms_page):
                 context['css_class'] += ' selected'
@@ -118,7 +118,6 @@ class FeincmsPageMenuNode(template.Node):
                     elif next.level < item.level:
                         context['css_class'] += ' last'
                         break
-
             elif next_level < item.level:
                 context['up'] = item.level - next_level
                 context['css_class'] += ' last'
@@ -150,7 +149,7 @@ class FeincmsPageMenuNode(template.Node):
         return '<ul%s>%s</ul>' % (attrs, output)
 
     def what(self, instance, level=1, depth=1, show_all_subnav=False, extended=False):
-        mptt_limit = level + depth - 1 # adjust limit to mptt level indexing
+        mptt_limit = level + depth - 1  # adjust limit to mptt level indexing
 
         entries = self.entries(instance, level, depth, show_all_subnav)
 
@@ -158,12 +157,12 @@ class FeincmsPageMenuNode(template.Node):
             _entries = list(entries)
             entries = []
 
-            extended_node_rght = [] # rght value of extended node.
-                                    # used to filter out children of
-                                    # nodes sporting a navigation extension
+            extended_node_rght = []  # rght value of extended node.
+                                     # used to filter out children of
+                                     # nodes sporting a navigation extension
 
             for entry in _entries:
-                if (show_all_subnav or entry==instance) and getattr(entry, 'navigation_extension', None):
+                if (show_all_subnav or entry == instance) and getattr(entry, 'navigation_extension', None):
                     entries.append(entry)
                     extended_node_rght.append(entry.rght)
 
@@ -185,9 +184,8 @@ class FeincmsPageMenuNode(template.Node):
 
     def ancestor_siblings(self, instance, level=1):
         opts = instance._meta
-        ancestors = instance.get_ancestors().filter(in_navigation=True, level__gte=level-1)
+        ancestors = instance.get_ancestors().filter(in_navigation=True, level__gte=level - 1)
         return instance._tree_manager.filter(**{'in_navigation': True, '%s__in' % opts.parent_attr: ancestors})
-
 
     def entries(self, instance, level=1, depth=1, show_all_subnav=False):
         if level <= 1:
@@ -198,7 +196,7 @@ class FeincmsPageMenuNode(template.Node):
             else:
                 queryset = Page.objects.toplevel_navigation()
                 if instance.level > 1:
-                    # Get the ancestors (and their direct children) between 
+                    # Get the ancestors (and their direct children) between
                     # this level and top of tree.
                     queryset = queryset | self.ancestor_siblings(instance)
                 queryset = queryset | \
@@ -228,18 +226,17 @@ class FeincmsPageMenuNode(template.Node):
         else:
             queryset = instance.children.in_navigation() | \
                     self.ancestor_siblings(instance, level=level) | \
-                    instance.get_siblings(include_self=True).filter(in_navigation=True, level__gte=level-1, level__lte=instance.level + depth)
+                    instance.get_siblings(include_self=True).filter(in_navigation=True, level__gte=level - 1, level__lte=instance.level + depth)
             if toplevel != instance:
                 queryset = queryset | toplevel.children.in_navigation()
             return PageManager.apply_active_filters(queryset)
 
 
-      
 def do_feincms_page_menu(parser, token):
     bits = token.split_contents()
 
     if len(bits) > 7:
-        raise template.TemplateSyntaxError("'%s tag accepts no more than 6 arguments." % args[0])
+        raise template.TemplateSyntaxError("'%s tag accepts no more than 6 arguments." % bits[0])
 
     kwargs = {}
     args = []
@@ -280,7 +277,6 @@ class MediaFilesNode(template.Node):
         grouped = opts.get('grouped', False)
         if grouped:
             # regroup the files by category
-            
             grouped = {}
             categories = []
             empty_title = "Other documents"
@@ -298,13 +294,11 @@ class MediaFilesNode(template.Node):
                         categories.append(category.title)
                     grouped[category.title].append(file)
 
-
             results = [{'grouper': c, 'list': grouped[c.title]} for c in Category.objects.filter(mediafile__in=files).distinct()]
             if empty_title in grouped:
                 results.append({'grouper': empty_title, 'list': grouped[empty_title]})
         else:
             results = files
-
 
         if self.var_name:
             context[self.var_name] = results
@@ -318,6 +312,7 @@ class MediaFilesNode(template.Node):
         context.pop()
 
         return html
+
 
 @register.tag
 def mediafiles(parser, token):
@@ -339,7 +334,6 @@ def mediafiles(parser, token):
             dict[str(pair[0])] = parser.compile_filter(pair[1])
     except TypeError:
         raise template.TemplateSyntaxError('Bad keyed argument "%s" for tag "%s"' % (pair, bits[0]))
-    
 
     return MediaFilesNode(parser.compile_filter(bits[1]), varname, **dict)
 
