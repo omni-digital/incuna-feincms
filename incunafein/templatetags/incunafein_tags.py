@@ -40,16 +40,16 @@ class FeincmsPageMenuNode(template.Node):
     Render the page navigation.
     arguments:
         feincms_page: The current feincms_page.
-        css_id: The css (dom) id to be used for the menu.
+        css_id: The css (dom) id to be used for the menu. Ignored if `ul_tag` is False.
         level: The level at which to start the navigation.
         depth: The depth of sub navigation to include.
         show_all_subnav: Whether to show all sub navigation items (or just the ones in the current pages branch).
         extended: Whether the navigation has been extended (to enable third party apps to exgtend the navigation).
+        ul_tag: Do we wrap the output in a <ul>? If False, `css_id` is ignored.
     example usage:
-        {% feincms_page_menu feincms_page 'nav' 1 2 %}
+        {% feincms_page_menu feincms_page depth=2 %}
     """
-    #(self, feincms_page, css_id="", level=1, depth=1, show_all_subnav=False, extended=False, css_class_prefix="")
-    def __init__(self,  feincms_page, css_id="", level=1, depth=1, show_all_subnav=False, extended=False, css_class_prefix=""):
+    def __init__(self,  feincms_page, css_id='', level=1, depth=1, show_all_subnav=False, extended=False, css_class_prefix='', ul_tag=True):
         self.feincms_page = feincms_page
         self.css_id = css_id
         self.css_class_prefix = css_class_prefix
@@ -57,6 +57,7 @@ class FeincmsPageMenuNode(template.Node):
         self.depth = depth
         self.show_all_subnav = show_all_subnav
         self.extended = extended
+        self.ul_tag = ul_tag
 
     def render(self, context):
         self.render_context = context
@@ -65,12 +66,19 @@ class FeincmsPageMenuNode(template.Node):
         if not isinstance(feincms_page, Page):
             return ''
 
-        level = int(self.level.resolve(context)if isinstance(self.level, template.FilterExpression) else self.level)
-        depth = int(self.depth.resolve(context) if isinstance(self.depth, template.FilterExpression) else self.depth)
-        css_id = self.css_id.resolve(context) if isinstance(self.css_id, template.FilterExpression) else self.css_id
-        css_class_prefix = self.css_class_prefix.resolve(context) if isinstance(self.css_class_prefix, template.FilterExpression) else self.css_class_prefix
-        show_all_subnav = self.show_all_subnav.resolve(context) if isinstance(self.show_all_subnav, template.FilterExpression) else self.show_all_subnav
-        extended = self.extended.resolve(context) if isinstance(self.extended, template.FilterExpression) else self.extended
+        def get_value(tag_arg):
+            if isinstance(tag_arg, template.FilterExpression):
+                return tag_arg.resolve(context)
+            else:
+                return tag_arg
+
+        level = int(get_value(self.level))
+        depth = int(get_value(self.depth))
+        css_id = get_value(self.css_id)
+        css_class_prefix = get_value(self.css_class_prefix)
+        show_all_subnav = get_value(self.show_all_subnav)
+        extended = get_value(self.extended)
+        ul_tag = bool(get_value(self.ul_tag))
 
         if not 'request' in context:
             raise ValueError("No request in the context. Try using RequestContext in the view.")
@@ -141,12 +149,13 @@ class FeincmsPageMenuNode(template.Node):
 
         output += get_next_item(item, items, prev_level)
 
-        if css_id:
-            attrs = ' id="%s"' % css_id
-        else:
-            attrs = ''
-
-        return '<ul%s>%s</ul>' % (attrs, output)
+        if ul_tag:
+            if css_id:
+                attrs = ' id="%s"' % css_id
+            else:
+                attrs = ''
+            output = '<ul%s>%s</ul>' % (attrs, output)
+        return output
 
     def what(self, instance, level=1, depth=1, show_all_subnav=False, extended=False):
         mptt_limit = level + depth - 1  # adjust limit to mptt level indexing
