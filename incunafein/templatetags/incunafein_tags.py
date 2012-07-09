@@ -76,7 +76,7 @@ class FeincmsPageMenuNode(template.Node):
         depth = int(get_value(self.depth))
         css_id = get_value(self.css_id)
         css_class_prefix = get_value(self.css_class_prefix)
-        show_all_subnav = get_value(self.show_all_subnav)
+        show_all_subnav = bool(get_value(self.show_all_subnav))
         extended = get_value(self.extended)
         ul_tag = bool(get_value(self.ul_tag))
 
