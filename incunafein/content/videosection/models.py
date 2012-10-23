@@ -42,6 +42,7 @@ class VideoSectionContent(models.Model):
             related_name='%s_%s_set' % (cls._meta.app_label, cls._meta.module_name),
             ))
         cls.add_to_class('preview_mediafile', models.ForeignKey(MediaFile, limit_choices_to={'type':IMAGE_TYPE}, verbose_name=_('preview image'),
+            related_name='%s_%s_preview_set' % (cls._meta.app_label, cls._meta.module_name),
             blank=True, null=True,
             ))
 
