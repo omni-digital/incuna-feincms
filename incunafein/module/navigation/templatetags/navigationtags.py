@@ -1,3 +1,5 @@
+import warnings
+
 from django.db.models import Q
 from django import template
 from incunafein.module.navigation.models import Navigation
@@ -34,7 +36,8 @@ class IncunaFeinNavigationNode(template.Node):
                 return ''
 
         if not 'request' in context:
-            raise ValueError("No request in the context. Try using RequestContext in the view.")
+            warnings.warn('No request in the context. Try using RequestContext in the view.')
+            return ''
         path = context['request'].path
 
         try:
