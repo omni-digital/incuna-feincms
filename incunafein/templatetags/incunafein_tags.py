@@ -16,9 +16,9 @@ class GetFeincmsPageNode(template.Node):
         self.var_name = var_name
 
     def render(self, context):
-        self.page_path = self.page_path.resolve(context)
+        page_path = self.page_path.resolve(context)
         try:
-            context[self.var_name] = Page.objects.page_for_path(path=self.page_path)
+            context[self.var_name] = Page.objects.page_for_path(path=page_path)
         except Page.DoesNotExist:
             pass
         return u''
