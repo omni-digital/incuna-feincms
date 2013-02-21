@@ -11,14 +11,14 @@ class GetFeincmsPageNode(template.Node):
     example usage:
         {% get_feincms_page path as varname %}
     """
-    def __init__(self, path, var_name):
-        self.path = template.Variable(path)
+    def __init__(self, page_path, var_name):
+        self.page_path = template.Variable(page_path)
         self.var_name = var_name
 
     def render(self, context):
-        self.path = self.path.resolve(context)
+        self.page_path = self.page_path.resolve(context)
         try:
-            context[self.var_name] = Page.objects.page_for_path(path=self.path)
+            context[self.var_name] = Page.objects.page_for_path(path=self.page_path)
         except Page.DoesNotExist:
             pass
         return u''
