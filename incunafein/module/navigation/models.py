@@ -1,22 +1,13 @@
 from django.db import models
-#from feincms.module.page.models import ActiveAwareContentManagerMixin
 import mptt
 
-#class NavigationManager(models.Manager, ActiveAwareContentManagerMixin):
-#    """
-#    Manager to make the Navigation objects behave like Page objects (in terms of navigation)
-#    """
-
-
-#    def toplevel_navigation(self):
-#        return self.in_navigation().filter(parent__isnull=True)
 
 class Navigation(models.Model):
     """Navigation item. uses mptt so can have sub navigation."""
 
     page = models.ForeignKey('page.Page', null=True, blank=True, help_text="Leave blank to create a top level navigation.")
     title = models.CharField(max_length=250, null=True, blank=True, help_text="Leave blank to use the page title.")
-    url = models.URLField(verify_exists=False, max_length=250, null=True, blank=True, help_text="Set either the page or url, not both.")
+    url = models.URLField(max_length=250, null=True, blank=True, help_text="Set either the page or url, not both.")
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', help_text="Leave blank to create a top level navigation.")
     dom_id = models.CharField(max_length=250, null=True, blank=True, help_text="This is used to identify the navigation and must be set for a top level navigation.")
     css_class = models.CharField(max_length=250, null=True, blank=True)
@@ -37,4 +28,3 @@ class Navigation(models.Model):
 
 
 mptt.register(Navigation)
-

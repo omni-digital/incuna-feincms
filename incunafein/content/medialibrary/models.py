@@ -1,5 +1,9 @@
 from django.template.loader import render_to_string
-from feincms.content.medialibrary.v2 import MediaFileContent as BaseMediaFileContent
+try:
+    from feincms.content.medialibrary.models import MediaFileContent as BaseMediaFileContent
+except ImportError:
+    # FeinCMS <= 1.7 when it was relocated
+    from feincms.content.medialibrary.v2 import MediaFileContent as BaseMediaFileContent
 
 
 class MediaFileContent(BaseMediaFileContent):

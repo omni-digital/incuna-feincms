@@ -1,4 +1,10 @@
-from feincms.module.page.models import Page, PageAdmin as PageAdminOld
+from feincms.module.page.models import Page
+try:
+    from feincms.module.page.modeladmins import PageAdmin as PageAdminOld
+except ImportError:
+    # FeinCMS<=1.7 when PageAdmin was moved
+    from feincms.module.page.models import PageAdmin as PageAdminOld
+
 try:
     from feincms.module.page.forms import PageAdminForm as PageAdminFormOld
 except ImportError:

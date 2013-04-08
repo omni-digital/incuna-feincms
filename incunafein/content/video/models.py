@@ -6,7 +6,11 @@ from django.db import models
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext_lazy as _
 
-from feincms.admin.editor import ItemEditorForm
+try:
+    from feincms.admin.item_editor import ItemEditorForm
+except ImportError:
+    # FeinCMS <= 1.7 when it was relocated
+    from feincms.admin.editor import ItemEditorForm
 
 # FeinCMS connector
 class VideoContent(models.Model):
