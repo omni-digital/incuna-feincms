@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 from feincms.module.page.models import Page
 
 def register(cls, admin_cls):
@@ -24,5 +25,11 @@ def register(cls, admin_cls):
     cls.prepared_date = property(getter, setter)
 
     if admin_cls and admin_cls.fieldsets:
+        # Legacy format
         admin_cls.fieldsets[1][1]['fields'] += ('_prepared_date',)
-
+    else:
+        # FeinCMS >= v1.7.0 format
+        admin_cls.add_extension_options(_('Date of Preparation'), {
+        'fields': ('_prepared_date',),
+        'classes': ('collapse',),
+        })
