@@ -59,7 +59,8 @@ class VideoContent(models.Model):
             'content/videocontent/%s.html' % self.position,
             'content/videocontent/default.html',
         ]
-        return render_to_string(templates, {'content': self, 'request': request})
+        context = {'content': self, 'request': request}
+        return render_to_string(templates, context)
 
     @classmethod
     def default_create_content_type(cls, cms_model):

@@ -1,13 +1,13 @@
+from feincms.module.page.forms import PageAdminForm as PageAdminFormOld
 from feincms.module.page.models import Page
 from feincms.module.page.modeladmins import PageAdmin as PageAdminOld
-from feincms.module.page.forms import PageAdminForm as PageAdminFormOld
-from django.utils.safestring import mark_safe
-from django.contrib.admin.widgets import ForeignKeyRawIdWidget
-from django.conf.urls.defaults import patterns
-from django.http import HttpRequest, HttpResponse
-from django.utils import simplejson
-from django.shortcuts import get_object_or_404
 from django.conf import settings
+from django.conf.urls.defaults import patterns
+from django.contrib.admin.widgets import ForeignKeyRawIdWidget
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404
+from django.utils import simplejson
+from django.utils.safestring import mark_safe
 
 
 class RefreshingParentForeignKeyRawIdWidget(ForeignKeyRawIdWidget):

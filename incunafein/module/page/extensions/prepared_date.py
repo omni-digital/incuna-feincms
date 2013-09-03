@@ -15,8 +15,16 @@ def register(cls, admin_cls):
         paths = ['/'] + ['/%s/' % '/'.join(tokens[:i]) for i in range(1, len(tokens)+1)]
         try:
             return Page.objects.apply_active_filters(
-                    Page.objects.exclude(_prepared_date='').filter(_cached_url__in=paths).extra(
-                        select={'_url_length': 'LENGTH(_cached_url)'}).order_by('-_url_length'))[0]._prepared_date
+                Page.objects.exclude(
+                    _prepared_date=''
+                ).filter(
+                    _cached_url__in=paths
+                ).extra(
+                    select={'_url_length': 'LENGTH(_cached_url)'}
+                ).order_by(
+                    '-_url_length'
+                )
+            )[0]._prepared_date
         except IndexError:
             return ''
 
@@ -26,6 +34,6 @@ def register(cls, admin_cls):
     cls.prepared_date = property(getter, setter)
 
     admin_cls.add_extension_options(_('Date of Preparation'), {
-    'fields': ('_prepared_date',),
-    'classes': ('collapse',),
+        'fields': ('_prepared_date',),
+        'classes': ('collapse',),
     })
