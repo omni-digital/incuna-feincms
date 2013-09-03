@@ -13,9 +13,8 @@ except ImportError:
     # FeinCMS <= 1.7 when it was relocated
     from feincms.admin.editor import ItemEditorForm
 
+from feincms.module.medialibrary.fields import MediaFileForeignKey
 from feincms.module.medialibrary.models import MediaFile
-
-from feincms.content.medialibrary.models import MediaFileWidget
 
 VIDEO_TYPE = 'video'
 IMAGE_TYPE = 'image'
@@ -43,22 +42,13 @@ class VideoSectionContent(models.Model):
         if 'feincms.module.medialibrary' not in django_settings.INSTALLED_APPS:
             raise ImproperlyConfigured, 'You have to add \'feincms.module.medialibrary\' to your INSTALLED_APPS before creating a %s' % cls.__name__
 
-        cls.add_to_class('video_mediafile', models.ForeignKey(MediaFile, limit_choices_to={'type':VIDEO_TYPE}, verbose_name=_('video'),
+        cls.add_to_class('video_mediafile', MediaFileForeignKey(MediaFile, limit_choices_to={'type':VIDEO_TYPE}, verbose_name=_('video'),
             related_name='%s_%s_set' % (cls._meta.app_label, cls._meta.module_name),
             ))
-        cls.add_to_class('preview_mediafile', models.ForeignKey(MediaFile, limit_choices_to={'type':IMAGE_TYPE}, verbose_name=_('preview image'),
+        cls.add_to_class('preview_mediafile', MediaFileForeignKey(MediaFile, limit_choices_to={'type':IMAGE_TYPE}, verbose_name=_('preview image'),
             related_name='%s_%s_preview_set' % (cls._meta.app_label, cls._meta.module_name),
-            blank=True, null=True,
+            null=True,
             ))
-
-        class MediaFileContentAdminForm(ItemEditorForm):
-           video_mediafile = forms.ModelChoiceField(queryset=MediaFile.objects.all(),#filter(type=VIDEO_TYPE),
-                                          widget=MediaFileWidget, required=True)
-           preview_mediafile = forms.ModelChoiceField(queryset=MediaFile.objects.all(),#filter(type=VIDEO_TYPE),
-                                            widget=MediaFileWidget, required=True)
-
-        cls.feincms_item_editor_form = MediaFileContentAdminForm
-        cls.form = MediaFileContentAdminForm
 
     @classmethod
     def get_queryset(cls, filter_args):

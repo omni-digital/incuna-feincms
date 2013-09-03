@@ -1,5 +1,11 @@
 # incuna-feincms changelog
 
+v0.17
+-------
+
+*Note: Breaks FeinCMS < 1.7 compatibility
+
+* Use `MediaFileForeignKey` for `VideoSectionContent`.
 
 v0.16.6
 -------
