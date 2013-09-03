@@ -3,7 +3,7 @@
 v0.17
 -------
 
-*Note: Breaks FeinCMS < 1.7 compatibility
+*Note: Dropped support for FeinCMS < 1.7 and django 1.3.*
 
 * Use `MediaFileForeignKey` for `VideoSectionContent`.
 
@@ -15,7 +15,7 @@ v0.16.6
 v0.16.5
 -------
 
-* Fix for django > 1.4 (try to use STATIC_URL over ADMIN_MEDIA_PREFIX)
+* Fix for django >= 1.4 (try to use STATIC_URL over ADMIN_MEDIA_PREFIX).
 
 v0.16.4
 -------

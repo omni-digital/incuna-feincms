@@ -5,25 +5,20 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext_lazy as _
-
 from feincms import settings
-try:
-    from feincms.admin.item_editor import ItemEditorForm
-except ImportError:
-    # FeinCMS <= 1.7 when it was relocated
-    from feincms.admin.editor import ItemEditorForm
-
+from feincms.admin.item_editor import ItemEditorForm
 from feincms.module.medialibrary.fields import MediaFileForeignKey
 from feincms.module.medialibrary.models import MediaFile
 
+
 VIDEO_TYPE = 'video'
 IMAGE_TYPE = 'image'
+
 
 class VideoSectionContent(models.Model):
     """
     Title, video media file and preview image media file fields in one content block.
     """
-
     feincms_item_editor_includes = {
         'head': [
             'admin/content/mediafile/init.html',
