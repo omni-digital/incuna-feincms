@@ -1,6 +1,6 @@
 from feincms.module.page.forms import PageAdminForm as PageAdminFormOld
-from feincms.module.page.models import Page
 from feincms.module.page.modeladmins import PageAdmin as PageAdminOld
+from feincms.module.page.models import Page
 from django.conf import settings
 from django.conf.urls.defaults import patterns
 from django.contrib.admin.widgets import ForeignKeyRawIdWidget
