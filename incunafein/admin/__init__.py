@@ -1,27 +1,17 @@
+from feincms.module.page.forms import PageAdminForm as PageAdminFormOld
+from feincms.module.page.modeladmins import PageAdmin as PageAdminOld
 from feincms.module.page.models import Page
-try:
-    from feincms.module.page.modeladmins import PageAdmin as PageAdminOld
-except ImportError:
-    # FeinCMS<=1.7 when PageAdmin was moved
-    from feincms.module.page.models import PageAdmin as PageAdminOld
-
-try:
-    from feincms.module.page.forms import PageAdminForm as PageAdminFormOld
-except ImportError:
-    # this is for FeinCMS<=1.5 compat when PageAdminFrom was located elsewhere
-    from feincms.module.page.models import PageAdminForm as PageAdminFormOld
-from django.utils.safestring import mark_safe
-from django.contrib.admin.widgets import ForeignKeyRawIdWidget
-from django.conf.urls.defaults import patterns
-from django.http import HttpRequest, HttpResponse
-from django.utils import simplejson
-from django.shortcuts import get_object_or_404
 from django.conf import settings
+from django.conf.urls.defaults import patterns
+from django.contrib.admin.widgets import ForeignKeyRawIdWidget
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404
+from django.utils import simplejson
+from django.utils.safestring import mark_safe
+
 
 class RefreshingParentForeignKeyRawIdWidget(ForeignKeyRawIdWidget):
-
     """Adds the javascript to force-refresh the template field when the parent field loses focus"""
-
     class Media:
         js = (settings.STATIC_URL + 'incunafein/scripts/get_templates.js',)
 
@@ -35,7 +25,6 @@ def get_valid_templates(instance=None, parent=None):
 
         @return dict: dict containing all the templates valid for this instance
     """
-
     # copy of all the available templates
     templates = Page._feincms_templates.copy()
     check_pages = None
@@ -64,14 +53,11 @@ def get_valid_templates(instance=None, parent=None):
 
 
 class PageAdminForm(PageAdminFormOld):
-
     """
-
     Adds hooks into the admin form to allow the munging of the template list.
 
     cf http://www.marcofucci.com/tumblelog/17/jun/2010/customizing-feincms-part-2/
     """
-
     def __init__(self, *args, **kwargs):
         super(PageAdminForm, self).__init__(*args, **kwargs)
 
@@ -96,7 +82,6 @@ class PageAdminForm(PageAdminFormOld):
             self.fields['template_key'].default = choices[0][0]
 
         self.fields['parent'].widget = RefreshingParentForeignKeyRawIdWidget(self.fields['parent'].widget.rel)
-
 
 
 class PageAdmin(PageAdminOld):
