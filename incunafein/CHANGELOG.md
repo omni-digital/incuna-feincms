@@ -1,6 +1,6 @@
 # incuna-feincms changelog
 
-v0.17
+v1.0.0
 -------
 
 *Note: Dropped support for FeinCMS < 1.7 and django 1.3.*
