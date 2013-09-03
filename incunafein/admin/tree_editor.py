@@ -6,11 +6,7 @@ from feincms.admin.tree_editor import *
 class TreeEditor(TreeEditor):
     def _actions_column(self, instance):
         actions = super(TreeEditor, self)._actions_column(instance)
-        try:
-            static_url = django_settings.STATIC_URL
-        except AttributeError:
-            # `ADMIN_MEDIA_PREFIX` was dropped in Django 1.4
-            static_url = django.ADMIN_MEDIA_PREFIX
+        static_url = django_settings.STATIC_URL
 
         opts = instance._meta
         if hasattr(opts, 'parent_attr'):
