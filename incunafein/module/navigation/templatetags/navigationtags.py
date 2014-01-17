@@ -8,7 +8,7 @@ register = template.Library()
 class IncunaFeinNavigationNode(template.Node):
     """
     Render a navigation.
-    arguments: 
+    arguments:
         navigate: The root item (instance or dom_id) of the navigation to render.
         depth: The depth of sub navigation to include.
         show_all_subnav: Whether to show all sub navigation items (or just the ones in the currently selected branch).
@@ -57,6 +57,7 @@ class IncunaFeinNavigationNode(template.Node):
                 context.update(extra_context)
 
             context['item'] = item
+            context['level'] = item.level
             context['url'] = item.get_absolute_url()
             context['is_current'] = context['url'] == path
             context['title'] = unicode(item)
@@ -92,7 +93,7 @@ class IncunaFeinNavigationNode(template.Node):
         for i, next in enumerate(entries[1:]):
             output += get_item(item, next.level, {'css_class': i==0 and 'first' or ''})
             item = next
-        
+
         output += get_item(item, entries[0].level, {'css_class': len(entries)==1 and 'first last' or 'last'})
 
         if instance:
@@ -115,7 +116,7 @@ class IncunaFeinNavigationNode(template.Node):
                 return instance.get_descendants().filter(level__lt=depth)
         else:
             if instance is None:
-                qs = Navigation.objects.filter(parent__isnull=True) 
+                qs = Navigation.objects.filter(parent__isnull=True)
                 if current:
                     qs = qs | current.get_ancestors() \
                             | current.get_siblings(include_self=True).filter(level__lt=depth) \
