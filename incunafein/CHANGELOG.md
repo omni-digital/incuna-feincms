@@ -1,5 +1,10 @@
 # incuna-feincms changelog
 
+v1.0.3
+------
+
+* Fix typo in navigation admin form
+
 v1.0.2
 ------
 
