@@ -7,11 +7,12 @@ from django.utils.translation import ugettext as _
 
 def is_mptt(m):
     # Does it quack?
-    return bool(getattr(m._meta, 'tree_id_attr', False)
-            and getattr(m._meta, 'parent_attr', False)
-            and getattr(m._meta, 'left_attr', False)
-            and getattr(m._meta, 'right_attr', False)
-            and getattr(m._meta, 'level_attr', False))
+    _meta = m._mptt_meta
+    return bool(getattr(_meta, 'tree_id_attr', False)
+            and getattr(_meta, 'parent_attr', False)
+            and getattr(_meta, 'left_attr', False)
+            and getattr(_meta, 'right_attr', False)
+            and getattr(_meta, 'level_attr', False))
 
 
 if django.VERSION[1] > 3:
@@ -22,7 +23,7 @@ if django.VERSION[1] > 3:
             from feincms.utils import shorten_string
 
             to = f.rel.to
-            opts = to._meta
+            opts = to._mptt_meta
 
             self.mppt_lookups = {
                 opts.tree_id_attr: '%s__exact' % (opts.tree_id_attr),
@@ -92,7 +93,7 @@ else:
                 self.field_path = f.name
 
             to = f.rel.to
-            opts = to._meta
+            opts = to._mptt_meta
 
             mppt_lookups = {opts.tree_id_attr: '%s__exact' % (opts.tree_id_attr),
                             opts.left_attr: '%s__gte' % (opts.left_attr),
