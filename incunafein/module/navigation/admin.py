@@ -8,7 +8,7 @@ from feincms.module.page.models import Page
 
 class MPTTModelChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
-        opts = obj._meta
+        opts = obj._mptt_meta
         return mark_safe("%s%s" % ("&nbsp;&nbsp;" * getattr(obj, opts.level_attr), unicode(obj)))
 
 
