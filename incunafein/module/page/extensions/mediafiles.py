@@ -4,21 +4,26 @@ Add a many-to-many relationship field to relate this page to mediafile.mediafile
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from feincms import extensions
 
-from feincms.module.page.models import Page
 
-def register(cls, admin_cls):
-    cls.add_to_class('media_files', models.ManyToManyField('medialibrary.MediaFile', blank=True,
-        #related_name='%(app_label)s_%(class)s_related',
-        null=True, help_text=_('Select media files that should be listed as related content.')))
+class Extension(extensions.Extension):
 
-    try:
-        admin_cls.filter_horizontal.append('media_files')
-    except AttributeError:
-        admin_cls.filter_horizontal = ['media_files']
+    def handle_model(self):
+        self.model.add_to_class(
+            'media_files',
+            models.ManyToManyField(
+                'medialibrary.MediaFile',
+                blank=True,
+                null=True,
+                help_text=_('Select media files that should be listed as related content.'),
+            ),
+        )
 
-    admin_cls.fieldsets.append((_('Media Files'), {
-        'fields': ('media_files',),
-        'classes': ('collapse',),
-        }))
+    def handle_modeladmin(self, modeladmin):
+        modeladmin.extend_list('filter_horizontal', ['media_files'])
 
+        modeladmin.add_extension_options(_('Media Files'), {
+            'fields': ('media_files',),
+            'classes': ('collapse',),
+        })
