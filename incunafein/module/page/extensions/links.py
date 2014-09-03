@@ -4,21 +4,25 @@ Add a many-to-many relationship field to relate this page to links.Link.
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from feincms import extensions
 
-from feincms.module.page.models import Page
 
-def register(cls, admin_cls):
-    cls.add_to_class('links', models.ManyToManyField('links.Link', blank=True,
-        #related_name='%(app_label)s_%(class)s_related',
-        null=True, help_text=_('Select links that should be listed as related content.')))
+class Extension(extensions.Extension):
 
-    try:
-        admin_cls.filter_horizontal.append('links')
-    except AttributeError:
-        admin_cls.filter_horizontal = ['links']
+    def handle_model(self):
+        self.model.add_to_class(
+            'links',
+            models.ManyToManyField(
+                'links.Link',
+                blank=True,
+                null=True,
+                help_text=_('Select links that should be listed as related content.'),
+            ),
+        )
 
-    admin_cls.fieldsets.append((_('Links'), {
-        'fields': ('links',),
-        'classes': ('collapse',),
-        }))
-
+    def handle_modeladmin(self, modeladmin):
+        modeladmin.extend_list('filter_horizontal', ['links'])
+        modeladmin.add_extension_options(_('Links'), {
+            'fields': ('links',),
+            'classes': ('collapse',),
+        })
