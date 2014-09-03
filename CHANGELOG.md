@@ -1,5 +1,14 @@
 # incuna-feincms changelog
 
+## CURRENT
+
+* Update extensions to remove deprecated `register(cls, admin_cls)` format.
+    * Update the prepared_date extension.
+    * Update comments extension.
+    * Update links extension.
+    * Update mediafiles extension.
+    * Update show_title extension.
+
 ## v1.1.0
 
 * Use model._mptt_meta rather than model._meta.
