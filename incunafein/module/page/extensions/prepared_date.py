@@ -1,6 +1,14 @@
+from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+import feincms
 from feincms.module.page.models import Page
+
+
+if feincms.VERSION >= (1, 9):
+    raise ImproperlyConfigured(
+        'prepared_date is not compatible with FeinCMS >= 1.9. Use feincms_extensions.prepared_date from https://github.com/incuna/feincms-extensions'
+    )
 
 
 def register(cls, admin_cls):
