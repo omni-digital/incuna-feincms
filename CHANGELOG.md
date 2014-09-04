@@ -1,5 +1,10 @@
 # incuna-feincms changelog
 
+## CURRENT
+
+* Add README with deprecation notice.
+* Add moved error to the `prepared_date` extension.
+
 ## v1.1.0
 
 * Use model._mptt_meta rather than model._meta.
