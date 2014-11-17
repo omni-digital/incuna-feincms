@@ -1,7 +1,8 @@
 # incuna-feincms changelog
 
-## CURRENT
+## v1.2.0
 
+* Make it compatible with FeinCMS 1.7
 * Add README with deprecation notice.
 * Add moved error to the `prepared_date` extension.
 
