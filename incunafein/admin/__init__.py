@@ -1,3 +1,5 @@
+import json
+
 from feincms.module.page.forms import PageAdminForm as PageAdminFormOld
 from feincms.module.page.modeladmins import PageAdmin as PageAdminOld
 from feincms.module.page.models import Page
@@ -6,7 +8,6 @@ from django.conf.urls import patterns
 from django.contrib.admin.widgets import ForeignKeyRawIdWidget
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.utils import simplejson
 from django.utils.safestring import mark_safe
 
 
@@ -48,7 +49,7 @@ def get_valid_templates(instance=None, parent=None):
             for c in t.children:
                 if c in templates:
                     del(templates[c])
-                
+
     return templates
 
 
@@ -86,7 +87,7 @@ class PageAdminForm(PageAdminFormOld):
 
 class PageAdmin(PageAdminOld):
     form = PageAdminForm
-    
+
     def get_templates(self, request):
         """Ajax view for getting a JSON list of the avaliable templates,
         (using the get_valid_templates function above)
@@ -101,8 +102,8 @@ class PageAdmin(PageAdminOld):
             result = [{'id':key, 'desc':unicode(valid_templates[key]),} for key in valid_templates.keys()]
         else:
             result = list()
-        
-        return HttpResponse(simplejson.dumps(result), mimetype="application/javascript")
+
+        return HttpResponse(json.dumps(result), mimetype="application/javascript")
 
     def get_urls(self):
         """URL hooks to add the above view at /admin/page/page/get_templates/"""
