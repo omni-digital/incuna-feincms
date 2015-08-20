@@ -1,5 +1,9 @@
 # incuna-feincms changelog
 
+## v2.0.1
+
+* Replace `django.utils.simplejson` with stdlib `json`.
+
 ## v2.0.0
 
 * Make it compatible with FeinCMS 1.7
