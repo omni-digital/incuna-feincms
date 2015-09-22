@@ -1,5 +1,9 @@
 # incuna-feincms changelog
 
+## v2.0.2
+
+* Explicitly set `fields` on `NavigationForm`.
+
 ## v2.0.1
 
 * Replace `django.utils.simplejson` with stdlib `json`.
