@@ -1,5 +1,9 @@
 # incuna-feincms changelog
 
+## v2.0.3
+
+* Set `up` value for last item of `feincms_page_menu`.
+
 ## v2.0.2
 
 * Explicitly set `fields` on `NavigationForm`.
