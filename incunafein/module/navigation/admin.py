@@ -18,6 +18,7 @@ class NavigationForm(forms.ModelForm):
 
     class Meta:
         model = Navigation
+        fields = ('page', 'title', 'url', 'parent', 'dom_id', 'css_class')
 
     def clean_dom_id(self):
         dom_id = self.cleaned_data['dom_id']
