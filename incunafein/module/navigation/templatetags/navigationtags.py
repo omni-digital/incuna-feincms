@@ -28,12 +28,12 @@ class IncunaFeinNavigationNode(template.Node):
     def render(self, context):
         navigate = self.navigate and self.navigate.resolve(context)
 
-        if isinstance(self.depth, template.FilterExpression):
+        if isinstance(self.depth, template.base.FilterExpression):
             depth = int(self.depth.resolve(context))
         else:
             depth = int(self.depth)
 
-        if isinstance(self.show_all_subnav, template.FilterExpression):
+        if isinstance(self.show_all_subnav, template.base.FilterExpression):
             show_all_subnav = self.show_all_subnav.resolve(context)
         else:
             show_all_subnav = self.show_all_subnav

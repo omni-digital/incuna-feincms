@@ -1,5 +1,9 @@
 # incuna-feincms changelog
 
+## v2.0.3
+
+* Import `FilterExpression` from `django.template.base`.
+
 ## v2.0.2
 
 * Explicitly set `fields` on `NavigationForm`.
