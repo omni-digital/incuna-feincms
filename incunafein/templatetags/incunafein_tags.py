@@ -117,6 +117,8 @@ class FeincmsPageMenuNode(template.Node):
 
             if next_level is None:
                 context['css_class'] += ' last'
+                if item.level > 0:
+                    context['up'] = item.level
             elif next_level > item.level:
                 context['down'] = next_level - item.level
                 # look ahead to the next at this level

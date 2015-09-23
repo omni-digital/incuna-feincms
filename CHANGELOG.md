@@ -1,8 +1,12 @@
 # incuna-feincms changelog
 
-## v2.0.3
+## v2.0.4
 
 * Import `FilterExpression` from `django.template.base`.
+
+## v2.0.3
+
+* Set `up` value for last item of `feincms_page_menu`.
 
 ## v2.0.2
 
