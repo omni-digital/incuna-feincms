@@ -5,13 +5,17 @@ from django import template
 from incunafein.module.navigation.models import Navigation
 
 register = template.Library()
+
+
 class IncunaFeinNavigationNode(template.Node):
     """
     Render a navigation.
     arguments:
-        navigate: The root item (instance or dom_id) of the navigation to render.
+        navigate: The root item (instance or dom_id) of the navigation
+            to render.
         depth: The depth of sub navigation to include.
-        show_all_subnav: Whether to show all sub navigation items (or just the ones in the currently selected branch).
+        show_all_subnav: Whether to show all sub navigation items
+            (or just the ones in the currently selected branch).
 
     example usage:
         {% incunafein_navigation 'footer' 1 0 %}
@@ -23,8 +27,16 @@ class IncunaFeinNavigationNode(template.Node):
 
     def render(self, context):
         navigate = self.navigate and self.navigate.resolve(context)
-        depth = int(self.depth.resolve(context) if isinstance(self.depth, template.FilterExpression) else self.depth)
-        show_all_subnav = self.show_all_subnav.resolve(context) if isinstance(self.show_all_subnav, template.FilterExpression) else self.show_all_subnav
+
+        if isinstance(self.depth, template.FilterExpression):
+            depth = int(self.depth.resolve(context))
+        else:
+            depth = int(self.depth)
+
+        if isinstance(self.show_all_subnav, template.FilterExpression):
+            show_all_subnav = self.show_all_subnav.resolve(context)
+        else:
+            show_all_subnav = self.show_all_subnav
 
         instance = None
         if isinstance(navigate, Navigation):
@@ -32,16 +44,19 @@ class IncunaFeinNavigationNode(template.Node):
         elif isinstance(navigate, (str, unicode)) and navigate:
             try:
                 instance = Navigation.objects.get(dom_id=navigate)
-            except Navigation.DoesNotExist, er:
+            except Navigation.DoesNotExist:
                 return ''
 
-        if not 'request' in context:
-            warnings.warn('No request in the context. Try using RequestContext in the view.')
+        if 'request' not in context:
+            msg = 'No request in the context. Try using RequestContext in the view.'
+            warnings.warn(msg)
             return ''
         path = context['request'].path
 
         try:
-            current = Navigation.objects.filter(Q(url=path) | Q(page___cached_url=path))[0]
+            current = Navigation.objects.filter(
+                Q(url=path) | Q(page___cached_url=path),
+            )[0]
         except IndexError:
             current = None
 
@@ -83,7 +98,8 @@ class IncunaFeinNavigationNode(template.Node):
             elif next_level < item.level:
                 context['up'] = item.level - next_level
 
-            html = template.loader.get_template('navigation/navitem.html').render(context)
+            navitem = template.loader.get_template('navigation/navitem.html')
+            html = navitem.render(context)
             context.pop()
 
             return html
@@ -91,16 +107,27 @@ class IncunaFeinNavigationNode(template.Node):
         output = ''
         item = entries[0]
         for i, next in enumerate(entries[1:]):
-            output += get_item(item, next.level, {'css_class': i==0 and 'first' or ''})
+            output += get_item(
+                item,
+                next.level,
+                {'css_class': i == 0 and 'first' or ''},
+            )
             item = next
 
-        output += get_item(item, entries[0].level, {'css_class': len(entries)==1 and 'first last' or 'last'})
+        output += get_item(
+            item,
+            entries[0].level,
+            {'css_class': len(entries) == 1 and 'first last' or 'last'},
+        )
 
         if instance:
-            return '<ul id="%s" class="%s">%s</ul>' % (instance.dom_id, instance.css_class, output)
+            return '<ul id="%s" class="%s">%s</ul>' % (
+                instance.dom_id,
+                instance.css_class,
+                output,
+            )
         else:
             return '<ul>%s</ul>' % (output,)
-
 
     def entries(self, instance, current, depth=1, show_all_subnav=False):
 
@@ -118,24 +145,38 @@ class IncunaFeinNavigationNode(template.Node):
             if instance is None:
                 qs = Navigation.objects.filter(parent__isnull=True)
                 if current:
-                    qs = qs | current.get_ancestors() \
-                            | current.get_siblings(include_self=True).filter(level__lt=depth) \
-                            | current.children.filter(level__lt=depth)
+                    siblings = current.get_siblings(include_self=True)
+                    filtered_siblings = siblings.filter(level__lt=depth)
+
+                    qs |= current.get_ancestors()
+                    qs |= filtered_siblings
+                    qs |= current.children.filter(level__lt=depth)
             else:
                 relative_depth = instance.level + depth
                 qs = instance.children.all()
                 if current:
-                    qs = qs | current.get_ancestors().filter(level__gt=instance.level) \
-                            | current.get_siblings(include_self=True).filter(level__gt=instance.level, level__lt=relative_depth) \
-                            | current.children.filter(level__gt=instance.level, level__lt=relative_depth)
+                    siblings = current.get_siblings(include_self=True)
+                    filtered_siblings = siblings.filter(
+                        level__gt=instance.level,
+                        level__lt=relative_depth,
+                    )
+                    children = current.children.filter(
+                        level__gt=instance.level,
+                        level__lt=relative_depth,
+                    )
+
+                    qs |= current.get_ancestors().filter(level__gt=instance.level)
+                    qs |= filtered_siblings
+                    qs |= children
             return qs
+
 
 def do_incunafein_navigation(parser, token):
     args = token.split_contents()
     if len(args) > 4:
-        raise template.TemplateSyntaxError("'%s tag accepts no more than 3 argument." % args[0])
+        raise template.TemplateSyntaxError(
+            "'%s tag accepts no more than 3 argument." % args[0],
+        )
     return IncunaFeinNavigationNode(*map(parser.compile_filter, args[1:]))
 
 register.tag('incunafein_navigation', do_incunafein_navigation)
-
-
