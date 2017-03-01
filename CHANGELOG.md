@@ -1,5 +1,9 @@
 # incuna-feincms changelog
 
+## v2.0.5
+
+* Support newer versions of FeinCMS, where `feincms_page_tags` has been moved.
+
 ## v2.0.4
 
 * Import `FilterExpression` from `django.template.base`.
