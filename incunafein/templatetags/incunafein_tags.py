@@ -1,7 +1,10 @@
 from django import template
 from feincms.module.medialibrary.models import Category
 from feincms.module.page.models import Page, PageManager
-from feincms.module.page.templatetags.feincms_page_tags import is_equal_or_parent_of
+try:
+    from feincms.templatetags.feincms_page_tags import is_equal_or_parent_of
+except ImportError:
+    from feincms.module.page.templatetags.feincms_page_tags import is_equal_or_parent_of
 
 register = template.Library()
 
