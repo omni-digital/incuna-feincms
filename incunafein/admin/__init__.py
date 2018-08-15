@@ -4,7 +4,7 @@ from feincms.module.page.forms import PageAdminForm as PageAdminFormOld
 from feincms.module.page.modeladmins import PageAdmin as PageAdminOld
 from feincms.module.page.models import Page
 from django.conf import settings
-from django.conf.urls import patterns
+from django.conf.urls import url
 from django.contrib.admin.widgets import ForeignKeyRawIdWidget
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -109,10 +109,10 @@ class PageAdmin(PageAdminOld):
         """URL hooks to add the above view at /admin/page/page/get_templates/"""
 
         urls = super(PageAdmin, self).get_urls()
-        my_urls = patterns('',
-            (r'^get_templates/?$', self.admin_site.admin_view(self.get_templates))
+        urls.append(
+            url(r'^get_templates/?$', self.admin_site.admin_view(self.get_templates))
         )
-        return my_urls + urls
+        return urls
 
 # Change the field order so the parent is first
 try:
