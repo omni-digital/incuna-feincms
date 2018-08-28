@@ -66,68 +66,55 @@ class IncunaFeinNavigationNode(template.Node):
             return ''
 
         def get_item(item, next_level, extra_context=None):
-            context.push()
-
+            url = item.get_absolute_url()
+            internal_context = {
+                'item': item,
+                'level': item.level,
+                'url': url,
+                'is_current': url == path,
+                'title': unicode(item),
+            }
             if extra_context:
-                context.update(extra_context)
-
-            context['item'] = item
-            context['level'] = item.level
-            context['url'] = item.get_absolute_url()
-            context['is_current'] = context['url'] == path
-            context['title'] = unicode(item)
+                internal_context.update(extra_context)
 
             css_class = item.css_class or (item.page and item.page.slug) or ''
             if css_class:
-                if 'css_class' in context:
-                    context['css_class'] += ' ' + css_class
+                if 'css_class' in internal_context:
+                    internal_context['css_class'] += ' ' + css_class
                 else:
-                    context['css_class'] = css_class
+                    internal_context['css_class'] = css_class
 
-            context['is_ancestor'] = False
-            if context['is_current']:
-                if 'css_class' in context:
-                    context['css_class'] += ' selected'
+            internal_context['is_ancestor'] = False
+            if internal_context['is_current']:
+                if 'css_class' in internal_context:
+                    internal_context['css_class'] += ' selected'
                 else:
-                    context['css_class'] = 'selected'
+                    internal_context['css_class'] = 'selected'
             else:
-                context['is_ancestor'] = path.startswith(context['url'])
+                internal_context['is_ancestor'] = path.startswith(url)
 
             if next_level > item.level:
-                context['down'] = next_level - item.level
+                internal_context['down'] = next_level - item.level
             elif next_level < item.level:
-                context['up'] = item.level - next_level
+                internal_context['up'] = item.level - next_level
 
             navitem = template.loader.get_template('navigation/navitem.html')
-            html = navitem.render(context)
-            context.pop()
+            html = navitem.render(internal_context)
 
             return html
 
         output = ''
         item = entries[0]
         for i, next in enumerate(entries[1:]):
-            output += get_item(
-                item,
-                next.level,
-                {'css_class': i == 0 and 'first' or ''},
-            )
+            output += get_item(item, next.level, {'css_class': i == 0 and 'first' or ''})
             item = next
 
-        output += get_item(
-            item,
-            entries[0].level,
-            {'css_class': len(entries) == 1 and 'first last' or 'last'},
-        )
+        output += get_item(item, entries[0].level, {'css_class': len(entries) == 1 and 'first last' or 'last'})
 
         if instance:
-            return '<ul id="%s" class="%s">%s</ul>' % (
-                instance.dom_id,
-                instance.css_class,
-                output,
-            )
+            return '<ul id="{}" class="{}">{}</ul>'.format(instance.dom_id, instance.css_class, output)
         else:
-            return '<ul>%s</ul>' % (output,)
+            return '<ul>{}</ul>'.format(output)
 
     def entries(self, instance, current, depth=1, show_all_subnav=False):
 

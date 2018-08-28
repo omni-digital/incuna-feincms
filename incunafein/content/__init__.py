@@ -1,7 +1,6 @@
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.template import RequestContext
 from django.template.loader import render_to_string
 
 
@@ -39,11 +38,9 @@ class BaseFkeyContent(models.Model):
                 ]
 
     def render(self, request=None, **kwargs):
+        context = {'content': self}
         if request is not None:
-            context = RequestContext(request)
-            context.update({ 'content': self })
-        else:
-            context = { 'content': self }
+            context.update({'request': request})
 
         return render_to_string(self.template_hierarchy(), context)
 
