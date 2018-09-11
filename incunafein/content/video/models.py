@@ -29,10 +29,10 @@ class VideoContent(models.Model):
     @classmethod
     def initialize_type(cls, TYPE_CHOICES=None):
         if 'videos' not in settings.INSTALLED_APPS:
-            raise ImproperlyConfigured, 'You have to add \'videos\' to your INSTALLED_APPS before creating a %s' % cls.__name__
+            raise ImproperlyConfigured('You have to add \'videos\' to your INSTALLED_APPS before creating a %s' % cls.__name__)
 
         if TYPE_CHOICES is None:
-            raise ImproperlyConfigured, 'You need to set TYPE_CHOICES when creating a %s' % cls.__name__
+            raise ImproperlyConfigured('You need to set TYPE_CHOICES when creating a %s' % cls.__name__)
 
         cls.add_to_class('video', models.ForeignKey('videos.video', verbose_name=_('video'),
             related_name='%s_%s_set' % (cls._meta.app_label, cls._meta.module_name)

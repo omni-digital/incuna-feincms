@@ -24,7 +24,7 @@ class GetFeincmsPageNode(template.Node):
             context[self.var_name] = Page.objects.page_for_path(path=page_path)
         except Page.DoesNotExist:
             pass
-        return u''
+        return ''
 
 
 def get_feincms_page(parser, token):
@@ -316,7 +316,7 @@ class MediaFilesNode(template.Node):
 
         if self.var_name:
             context[self.var_name] = results
-            return u''
+            return ''
 
         context.push()
         context['mediafiles'] = files
