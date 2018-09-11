@@ -10,8 +10,8 @@ class TreeEditor(TreeEditor):
 
         opts = instance._meta
         if hasattr(opts, 'parent_attr'):
-            actions.insert(0, u'<a href="add/?%s=%s" title="%s"><img src="%simg/admin/icon_addlink.gif" alt="%s"></a>' % (
+            actions.insert(0, '<a href="add/?%s=%s" title="%s"><img src="%simg/admin/icon_addlink.gif" alt="%s"></a>' % (
                 opts.parent_attr, instance.pk, _('Add child'), static_url, _('Add child')))
-            actions.insert(0, u'<a href="%s" title="%s"><img src="%simg/admin/selector-search.gif" alt="%s" /></a>' % (
+            actions.insert(0, '<a href="%s" title="%s"><img src="%simg/admin/selector-search.gif" alt="%s" /></a>' % (
                 instance.get_absolute_url(), _('View on site'), static_url, _('View on site')))
         return actions

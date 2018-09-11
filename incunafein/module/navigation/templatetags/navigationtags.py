@@ -41,7 +41,7 @@ class IncunaFeinNavigationNode(template.Node):
         instance = None
         if isinstance(navigate, Navigation):
             instance = navigate
-        elif isinstance(navigate, (str, unicode)) and navigate:
+        elif isinstance(navigate, str) and navigate:
             try:
                 instance = Navigation.objects.get(dom_id=navigate)
             except Navigation.DoesNotExist:
@@ -72,7 +72,7 @@ class IncunaFeinNavigationNode(template.Node):
                 'level': item.level,
                 'url': url,
                 'is_current': url == path,
-                'title': unicode(item),
+                'title': str(item),
             }
             if extra_context:
                 internal_context.update(extra_context)
@@ -164,6 +164,6 @@ def do_incunafein_navigation(parser, token):
         raise template.TemplateSyntaxError(
             "'%s tag accepts no more than 3 argument." % args[0],
         )
-    return IncunaFeinNavigationNode(*map(parser.compile_filter, args[1:]))
+    return IncunaFeinNavigationNode(*list(map(parser.compile_filter, args[1:])))
 
 register.tag('incunafein_navigation', do_incunafein_navigation)

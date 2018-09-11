@@ -18,13 +18,13 @@ class Navigation(models.Model):
         ordering = ['tree_id', 'lft']
 
     def __unicode__(self):
-        return u"%s" % (self.title or self.page or self.url or self.dom_id,)
+        return "%s" % (self.title or self.page or self.url or self.dom_id,)
 
     def get_absolute_url(self):
-        return u"%s" % (self.page and self.page.get_absolute_url() or self.url,)
+        return "%s" % (self.page and self.page.get_absolute_url() or self.url,)
 
     def get_css_class(self):
-        return u"%s" % (self.css_class or (self.page and  self.page.slug))
+        return "%s" % (self.css_class or (self.page and  self.page.slug))
 
 
 mptt.register(Navigation)

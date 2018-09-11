@@ -23,7 +23,7 @@ class BaseFkeyContent(models.Model):
     @classmethod
     def initialize_type(cls):
         if cls.app_label not in settings.INSTALLED_APPS:
-            raise ImproperlyConfigured, "You have to add '%s' to your INSTALLED_APPS before creating a %s" % (cls.app_label, cls.__name__)
+            raise ImproperlyConfigured("You have to add '%s' to your INSTALLED_APPS before creating a %s" % (cls.app_label, cls.__name__))
 
         cls.add_to_class(cls.field_name or cls.object_name.lower(),
             models.ForeignKey('%s.%s' % (cls.app_label, cls.object_name),
@@ -53,7 +53,7 @@ class BaseM2MContent(BaseFkeyContent):
     @classmethod
     def initialize_type(cls):
         if cls.app_label not in settings.INSTALLED_APPS:
-            raise ImproperlyConfigured, "You have to add '%s' to your INSTALLED_APPS before creating a %s" % (cls.app_label, cls.__name__)
+            raise ImproperlyConfigured("You have to add '%s' to your INSTALLED_APPS before creating a %s" % (cls.app_label, cls.__name__))
 
         cls.add_to_class(cls.field_name or cls.object_name.lower()+'s',
             models.ManyToManyField('%s.%s' % (cls.app_label, cls.object_name),

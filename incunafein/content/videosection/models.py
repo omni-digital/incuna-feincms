@@ -35,7 +35,7 @@ class VideoSectionContent(models.Model):
     @classmethod
     def initialize_type(cls):
         if 'feincms.module.medialibrary' not in django_settings.INSTALLED_APPS:
-            raise ImproperlyConfigured, 'You have to add \'feincms.module.medialibrary\' to your INSTALLED_APPS before creating a %s' % cls.__name__
+            raise ImproperlyConfigured('You have to add \'feincms.module.medialibrary\' to your INSTALLED_APPS before creating a %s' % cls.__name__)
 
         cls.add_to_class('video_mediafile', MediaFileForeignKey(MediaFile, limit_choices_to={'type':VIDEO_TYPE}, verbose_name=_('video'),
             related_name='%s_%s_set' % (cls._meta.app_label, cls._meta.module_name),

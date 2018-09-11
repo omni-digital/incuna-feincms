@@ -1,6 +1,6 @@
 from django.contrib import admin
 from incunafein.admin import editor
-from models import Navigation
+from .models import Navigation
 from django import forms
 from django.utils.safestring import mark_safe
 from feincms.module.page.models import Page
@@ -9,7 +9,7 @@ from feincms.module.page.models import Page
 class MPTTModelChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
         opts = obj._mptt_meta
-        return mark_safe("%s%s" % ("&nbsp;&nbsp;" * getattr(obj, opts.level_attr), unicode(obj)))
+        return mark_safe("%s%s" % ("&nbsp;&nbsp;" * getattr(obj, opts.level_attr), str(obj)))
 
 
 class NavigationForm(forms.ModelForm):
@@ -48,7 +48,7 @@ class NavigationForm(forms.ModelForm):
         title = cleaned_data.get("title")
         if parent:
             if (page and url) or (not (page or url)):
-                msg = u"Provide either page or url (not both)."
+                msg = "Provide either page or url (not both)."
                 self._errors["page"] = self.error_class([msg])
                 self._errors["url"] = self.error_class([msg])
 
@@ -56,7 +56,7 @@ class NavigationForm(forms.ModelForm):
                 del cleaned_data["url"]
 
             elif url and not title:
-                msg = u"Provide a title for the url."
+                msg = "Provide a title for the url."
                 self._errors["url"] = self.error_class([msg])
                 self._errors["title"] = self.error_class([msg])
 
@@ -64,7 +64,7 @@ class NavigationForm(forms.ModelForm):
                 del cleaned_data["title"]
         else:
             if not cleaned_data.get("dom_id"):
-                msg = u"Provide a Dom id for the (top level) navigation."
+                msg = "Provide a Dom id for the (top level) navigation."
                 self._errors["parent"] = self.error_class([msg])
                 self._errors["dom_id"] = self.error_class([msg])
 
