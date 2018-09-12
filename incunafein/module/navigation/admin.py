@@ -1,6 +1,6 @@
 from django.contrib import admin
 from incunafein.admin import editor
-from .models import Navigation
+from incunafein.module.navigation.models import Navigation
 from django import forms
 from django.utils.safestring import mark_safe
 from feincms.module.page.models import Page
