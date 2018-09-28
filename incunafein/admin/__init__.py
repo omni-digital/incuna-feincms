@@ -44,7 +44,7 @@ def get_valid_templates(instance=None, parent=None):
                 templates = dict([(templates[child].key, templates[child]) for child in page.template.children])
 
     # remove templates that are defined as children within the current set
-    for t in templates.values():
+    for t in list(templates.values()):
         if hasattr(t, 'children') and t.children:
             for c in t.children:
                 if c in templates:
@@ -70,7 +70,7 @@ class PageAdminForm(PageAdminFormOld):
         templates = get_valid_templates(instance, parent)
 
         choices = []
-        for key, template in templates.items():
+        for key, template in list(templates.items()):
             if template.preview_image:
                 choices.append((template.key,
                     mark_safe('<img src="%s" alt="%s" /> %s' % (
@@ -99,7 +99,7 @@ class PageAdmin(PageAdminOld):
             parent = None
         valid_templates = get_valid_templates(parent=parent)
         if valid_templates:
-            result = [{'id':key, 'desc':str(valid_templates[key]),} for key in valid_templates.keys()]
+            result = [{'id':key, 'desc':str(valid_templates[key]),} for key in list(valid_templates.keys())]
         else:
             result = list()
 

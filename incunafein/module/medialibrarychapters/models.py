@@ -12,7 +12,7 @@ class MediaFileChapter(models.Model):
         app_label = 'medialibrary'
         ordering = ('timecode',)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     @property

@@ -43,11 +43,11 @@ if django.VERSION[1] > 3:
             else:
                 # Filtering on relation to other object.
                 self.title_suffix = ' ' + str(self.title)
-                for k, v in self.mppt_lookups.items():
+                for k, v in list(self.mppt_lookups.items()):
                     self.mppt_lookups[k] = "%s__%s" % (self.field_path, v)
 
             self.title = _('Ancestor') + self.title_suffix
-            self.lookup_kwargs = self.mppt_lookups.values()
+            self.lookup_kwargs = list(self.mppt_lookups.values())
             self.lookup_params = dict([(k, request.GET.get(k, None)) for k in self.lookup_kwargs])
             self.lookup_choices = [
                 (
@@ -55,11 +55,11 @@ if django.VERSION[1] > 3:
                     "%s%s" % ("&nbsp;" * getattr(parent, opts.level_attr), shorten_string(str(parent), max_length=25)),
                     # MPTT lookup params
                     dict([(lookup, str(getattr(parent, kwarg)))
-                        for kwarg, lookup in self.mppt_lookups.items()])
+                        for kwarg, lookup in list(self.mppt_lookups.items())])
                 ) for parent in parents]
 
         def expected_parameters(self):
-            return self.mppt_lookups.keys()
+            return list(self.mppt_lookups.keys())
 
         def choices(self, cl):
             yield {
@@ -107,10 +107,10 @@ else:
                 self.title_suffix = ''
             else:
                 self.title_suffix = ' ' + str(super(MPTTFilterSpec, self).title())
-                for k, v in mppt_lookups.items():
+                for k, v in list(mppt_lookups.items()):
                     mppt_lookups[k] = "%s__%s" % (self.field_path, v)
 
-            self.lookup_kwargs = mppt_lookups.values()
+            self.lookup_kwargs = list(mppt_lookups.values())
             self.lookup_params = dict([(k, request.GET.get(k, None)) for k in self.lookup_kwargs])
             self.lookup_choices = [("%s%s" % ("&nbsp;" * getattr(parent, opts.level_attr), shorten_string(str(parent), max_length=25)),
                                     dict([(lookup, str(getattr(parent, kwarg))) for kwarg, lookup in list(mppt_lookups.items())]))
