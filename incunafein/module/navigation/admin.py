@@ -75,7 +75,7 @@ class NavigationForm(forms.ModelForm):
 
 
 class NavigationAdmin(editor.TreeEditor):
-    list_display = ('__unicode__', )
+    list_display = ('__str__', )
     list_filter = ('parent',)
     form = NavigationForm
 

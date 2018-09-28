@@ -17,7 +17,7 @@ class Navigation(models.Model):
     class Meta:
         ordering = ['tree_id', 'lft']
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s" % (self.title or self.page or self.url or self.dom_id,)
 
     def get_absolute_url(self):
